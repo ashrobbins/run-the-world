@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Run the World
 
-## Getting Started
+A running-adventure web app — your real Strava runs move you along a chosen
+real-world journey through checkpoints toward a destination.
 
-First, run the development server:
+This is the **Phase 1** slice: connect Strava → see one seeded journey
+(Winchester → Sydney) → sync a run → watch progress update → see the
+checkpoint-unlocked celebration when you cross one. See
+`/Users/ash.robbins/.claude/plans/deep-juggling-goose.md` for the full plan.
+
+## Prerequisites
+
+1. **Supabase project** — either a hosted project (supabase.com) or the local
+   dev stack via `npx supabase start` (needs Docker running).
+2. **Strava API app** — register one at
+   [developers.strava.com](https://developers.strava.com). Standard-tier
+   access requires an active Strava subscription on the developer's account
+   (2026 API policy). Set the Authorization Callback Domain to `localhost`
+   for local dev.
+3. **Mapbox token** (optional for now) — without it the map card shows a
+   placeholder instead of a real map image.
+
+## Setup
 
 ```bash
+cp .env.local.example .env.local
+# fill in NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+# SUPABASE_SERVICE_ROLE_KEY, STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET,
+# NEXT_PUBLIC_MAPBOX_TOKEN
+
+npm install
+npx supabase db push   # applies supabase/migrations against your project
+# then run supabase/seed.sql against the same project (SQL editor, or
+# `psql "$DATABASE_URL" -f supabase/seed.sql`) to create the seeded journey
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000`, sign in with a magic link, then connect
+Strava from the Home screen's "Link with Strava" card.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — local dev server
+- `npm run build` — production build
+- `npm test` — run the vitest suite (checkpoint progress logic, flag renderer)
+- `npm run lint` — ESLint
 
-## Learn More
+## Architecture notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Data retention**: `lib/strava/import.ts` implements the "derive-then-discard"
+  pipeline — raw Strava activity payloads never leave that function's scope.
+  Only distance/type/date and the Strava activity ID (for dedup) are stored.
+- **CheckpointMarker** (`components/checkpoint-marker/`) renders a country's
+  flag as a small circular marker from a data table
+  (`flags.ts`) rather than per-country image assets — see the file for the
+  ~95 supported country codes.
+- **Login vs. Strava**: signing into the app (Supabase magic-link auth) and
+  connecting Strava (OAuth for activity data) are deliberately separate —
+  see the plan's "Open decisions" section for why.

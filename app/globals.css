@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #ffffff;
+  --color-card: #f7f7fb;
+  --color-border: #ecebf5;
+  --color-accent: #6c5ce7;
+  --color-accent-dark: #5544c4;
+  --color-accent-light: #edebfb;
+  --color-text-primary: #12203d;
+  --color-text-secondary: #8b93a7;
+  --color-text-faint: #b4b4ce;
+  --color-success: #1b8a4e;
+  --color-success-bg: #e8f8ef;
+  --color-danger: #c24a16;
+  --color-danger-bg: #fdece4;
+  --color-strava: #fc4c02;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--color-bg);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-accent: var(--color-accent);
+  --color-accent-dark: var(--color-accent-dark);
+  --color-accent-light: var(--color-accent-light);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-faint: var(--color-text-faint);
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --color-danger: var(--color-danger);
+  --color-danger-bg: var(--color-danger-bg);
+  --color-strava: var(--color-strava);
+  --font-heading: var(--font-space-grotesk);
+  --font-body: var(--font-ibm-plex-sans);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
 }
