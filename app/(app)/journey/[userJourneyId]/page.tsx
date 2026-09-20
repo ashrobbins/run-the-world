@@ -131,7 +131,7 @@ export default async function JourneyDetailPage({
           <span style={{ color: "var(--color-text-secondary)" }}>Log it manually (coming soon)</span>
         </p>
 
-        <div className="flex justify-center pb-4">
+        <div className="flex justify-center mt-3 pb-4">
           <DeleteJourneyButton userJourneyId={userJourney.id} journeyName={journey.name} />
         </div>
       </div>
