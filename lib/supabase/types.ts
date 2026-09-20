@@ -73,6 +73,7 @@ export interface Database {
           route_geometry: Json | null;
           image_url: string | null;
           is_published: boolean;
+          created_by: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["journeys"]["Row"]>;

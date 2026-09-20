@@ -17,7 +17,10 @@ export type FlagDefinition =
   | { kind: "bands-horizontal"; colors: string[]; stops?: number[]; dot?: DotEmblem }
   | { kind: "bands-vertical"; colors: string[]; stops?: number[]; dot?: DotEmblem }
   | { kind: "cross"; background: string; cross: string; inner?: string }
-  | { kind: "bespoke"; render: "uk" | "usa" | "turkey" | "australia" | "singapore" };
+  | {
+      kind: "bespoke";
+      render: "uk" | "usa" | "turkey" | "australia" | "singapore" | "canada" | "brazil";
+    };
 
 export const FLAGS: Record<string, FlagDefinition> = {
   uk: { kind: "bespoke", render: "uk" },
@@ -25,6 +28,8 @@ export const FLAGS: Record<string, FlagDefinition> = {
   turkey: { kind: "bespoke", render: "turkey" },
   australia: { kind: "bespoke", render: "australia" },
   singapore: { kind: "bespoke", render: "singapore" },
+  canada: { kind: "bespoke", render: "canada" },
+  brazil: { kind: "bespoke", render: "brazil" },
 
   france: { kind: "bands-vertical", colors: ["#0055A4", "#FFFFFF", "#EF4135"] },
   austria: { kind: "bands-horizontal", colors: ["#ED2939", "#FFFFFF", "#ED2939"] },
@@ -246,6 +251,94 @@ export const FLAGS: Record<string, FlagDefinition> = {
   brunei: { kind: "bands-horizontal", colors: ["#FFCE00"] },
   philippines: { kind: "bands-horizontal", colors: ["#0038A8", "#CE1126"] },
   timorleste: { kind: "bands-horizontal", colors: ["#DC241F"] },
+
+  // Americas
+  mexico: {
+    kind: "bands-vertical",
+    colors: ["#006847", "#FFFFFF", "#CE1126"],
+    dot: { color: "#8B5A2B", top: 50, left: 50, size: 0.3 },
+  },
+  guatemala: { kind: "bands-vertical", colors: ["#4997D0", "#FFFFFF", "#4997D0"] },
+  belize: { kind: "bands-horizontal", colors: ["#CE1126", "#003F87", "#CE1126"], stops: [0, 15, 85, 100] },
+  honduras: {
+    kind: "bands-horizontal",
+    colors: ["#0073CF", "#FFFFFF", "#0073CF"],
+    dot: { color: "#0073CF", top: 50, left: 50, size: 0.3 },
+  },
+  elsalvador: { kind: "bands-horizontal", colors: ["#0047AB", "#FFFFFF", "#0047AB"] },
+  nicaragua: { kind: "bands-horizontal", colors: ["#0067C6", "#FFFFFF", "#0067C6"] },
+  costarica: {
+    kind: "bands-horizontal",
+    colors: ["#002B7F", "#FFFFFF", "#CE1126", "#FFFFFF", "#002B7F"],
+    stops: [0, 20, 40, 60, 80, 100],
+  },
+  panama: {
+    kind: "bands-vertical",
+    colors: ["#FFFFFF", "#DA121A"],
+    dot: { color: "#005293", top: 30, left: 25, size: 0.3 },
+  },
+  cuba: {
+    kind: "bands-horizontal",
+    colors: ["#002A8F", "#FFFFFF", "#002A8F", "#FFFFFF", "#002A8F"],
+    stops: [0, 20, 40, 60, 80, 100],
+    dot: { color: "#FFFFFF", top: 50, left: 22, size: 0.32 },
+  },
+  jamaica: { kind: "bands-horizontal", colors: ["#000000", "#FED100", "#000000"], stops: [0, 33, 67, 100] },
+  haiti: {
+    kind: "bands-horizontal",
+    colors: ["#00209F", "#D21034"],
+    dot: { color: "#FFFFFF", top: 50, left: 50, size: 0.4 },
+  },
+  dominicanrepublic: { kind: "cross", background: "#002D62", cross: "#FFFFFF", inner: "#CE1126" },
+  bahamas: { kind: "bands-horizontal", colors: ["#00778B", "#FFC72C", "#00778B"] },
+  trinidadandtobago: { kind: "bands-horizontal", colors: ["#CE1126"] },
+  puertorico: {
+    kind: "bands-horizontal",
+    colors: ["#ED2939", "#FFFFFF", "#ED2939", "#FFFFFF", "#ED2939"],
+    stops: [0, 20, 40, 60, 80, 100],
+    dot: { color: "#FFFFFF", top: 50, left: 25, size: 0.34 },
+  },
+  colombia: {
+    kind: "bands-horizontal",
+    colors: ["#FCD116", "#003893", "#CE1126"],
+    stops: [0, 50, 75, 100],
+  },
+  venezuela: {
+    kind: "bands-horizontal",
+    colors: ["#FCD116", "#003893", "#CE1126"],
+    dot: { color: "#FFFFFF", top: 50, left: 50, size: 0.3 },
+  },
+  guyana: { kind: "bands-horizontal", colors: ["#009739"], dot: { color: "#FCD116", top: 50, left: 50, size: 0.45 } },
+  suriname: {
+    kind: "bands-horizontal",
+    colors: ["#377E3F", "#FFFFFF", "#B40A2D", "#FFFFFF", "#377E3F"],
+    stops: [0, 14, 43, 71, 86, 100],
+    dot: { color: "#FCD116", top: 50, left: 50, size: 0.28 },
+  },
+  ecuador: {
+    kind: "bands-horizontal",
+    colors: ["#FFDD00", "#034EA2", "#ED1C24"],
+    stops: [0, 50, 75, 100],
+    dot: { color: "#8B5A2B", top: 50, left: 50, size: 0.3 },
+  },
+  peru: { kind: "bands-vertical", colors: ["#D91023", "#FFFFFF", "#D91023"] },
+  bolivia: { kind: "bands-horizontal", colors: ["#DA291C", "#FFD700", "#007A33"] },
+  paraguay: { kind: "bands-horizontal", colors: ["#D52B1E", "#FFFFFF", "#0038A8"] },
+  chile: {
+    kind: "bands-horizontal",
+    colors: ["#FFFFFF", "#D52B1E"],
+    dot: { color: "#0039A6", top: 25, left: 22, size: 0.4 },
+  },
+  argentina: {
+    kind: "bands-horizontal",
+    colors: ["#74ACDF", "#FFFFFF", "#74ACDF"],
+    dot: { color: "#F6B40E", top: 50, left: 50, size: 0.24 },
+  },
+  uruguay: {
+    kind: "bands-horizontal",
+    colors: ["#FFFFFF", "#0038A8"],
+    dot: { color: "#FCD116", top: 22, left: 22, size: 0.3 },
+  },
 };
 
 export type CountryCode = keyof typeof FLAGS;

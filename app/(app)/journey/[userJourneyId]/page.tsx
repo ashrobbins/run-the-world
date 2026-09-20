@@ -5,6 +5,7 @@ import { ProgressStat } from "@/components/journey/ProgressStat";
 import { CheckpointStampsRow } from "@/components/journey/CheckpointStampsRow";
 import { MapCard } from "@/components/journey/MapCard";
 import { LastRunCard } from "@/components/journey/LastRunCard";
+import { DeleteJourneyButton } from "@/components/journey/DeleteJourneyButton";
 import { SyncNowButton } from "@/components/strava/SyncNowButton";
 import { classifyCheckpoints } from "@/lib/journeys/progress";
 import { formatDistance } from "@/lib/units";
@@ -23,7 +24,7 @@ export default async function JourneyDetailPage({
 
   const { data: userJourney } = await supabase
     .from("user_journeys")
-    .select("id, distance_completed, journey_id, journeys(name, total_distance)")
+    .select("id, distance_completed, journey_id, journeys(name, total_distance, start_name, destination_name)")
     .eq("id", userJourneyId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -31,6 +32,8 @@ export default async function JourneyDetailPage({
   if (!userJourney) notFound();
 
   const journey = Array.isArray(userJourney.journeys) ? userJourney.journeys[0] : userJourney.journeys;
+  const routeLabel = `${journey.start_name} → ${journey.destination_name}`;
+  const showRouteLabel = journey.name !== routeLabel;
 
   const { data: checkpoints } = await supabase
     .from("checkpoints")
@@ -73,6 +76,11 @@ export default async function JourneyDetailPage({
           <div className="text-sm font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
             {journey.name}
           </div>
+          {showRouteLabel && (
+            <div className="text-xs font-medium" style={{ color: "var(--color-text-secondary)" }}>
+              {routeLabel}
+            </div>
+          )}
         </div>
         <span className="w-5" />
       </div>
@@ -118,10 +126,14 @@ export default async function JourneyDetailPage({
 
         <SyncNowButton userJourneyId={userJourney.id} />
 
-        <p className="text-center text-xs mt-3 pb-4" style={{ color: "var(--color-text-faint)" }}>
+        <p className="text-center text-xs mt-3" style={{ color: "var(--color-text-faint)" }}>
           Strava sync missed a run?{" "}
           <span style={{ color: "var(--color-text-secondary)" }}>Log it manually (coming soon)</span>
         </p>
+
+        <div className="flex justify-center pb-4">
+          <DeleteJourneyButton userJourneyId={userJourney.id} journeyName={journey.name} />
+        </div>
       </div>
     </div>
   );

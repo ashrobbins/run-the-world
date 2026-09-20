@@ -1,7 +1,7 @@
 import { FLAGS, type CountryCode } from "./flags";
 import { renderFlagFill } from "./flag-renderer";
 
-export type CheckpointMarkerState = "reached" | "next" | "locked";
+export type CheckpointMarkerState = "reached" | "next" | "locked" | "preview";
 
 interface CheckpointMarkerProps {
   countryCode: CountryCode | string;

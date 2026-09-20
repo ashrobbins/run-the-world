@@ -1,3 +1,5 @@
+import { encodePolyline } from "@/lib/polyline";
+
 interface LatLng {
   lat: number;
   lng: number;
@@ -49,8 +51,13 @@ export function MapCard({
   const isNearCity = nearestCheckpointKm(checkpoints, distanceCompleted) <= CITY_ZOOM_THRESHOLD_KM;
   const zoom = isNearCity ? 11 : 4;
 
+  const sortedForPath = [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
+  const encodedPath = encodePolyline(sortedForPath);
+  const pathOverlay = `path-3+6C5CE7-0.6(${encodeURIComponent(encodedPath)})`;
+  const pinOverlay = `pin-s+6C5CE7(${position.lng},${position.lat})`;
+
   const mapUrl = token
-    ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+6C5CE7(${position.lng},${position.lat})/${position.lng},${position.lat},${zoom},0/640x300@2x?access_token=${token}`
+    ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${pathOverlay},${pinOverlay}/${position.lng},${position.lat},${zoom},0/640x300@2x?access_token=${token}`
     : null;
 
   return (

@@ -89,12 +89,38 @@ function BespokeSingapore() {
   );
 }
 
+function BespokeCanada() {
+  return (
+    <g>
+      <rect width="100" height="100" fill="#FFFFFF" />
+      <rect x={0} width={25} height={100} fill="#FF0000" />
+      <rect x={75} width={25} height={100} fill="#FF0000" />
+      <path
+        d="M50,15 L55,30 L68,25 L60,38 L72,42 L58,48 L65,60 L52,55 L52,75 L48,55 L35,60 L42,48 L28,42 L40,38 L32,25 L45,30 Z"
+        fill="#FF0000"
+      />
+    </g>
+  );
+}
+
+function BespokeBrazil() {
+  return (
+    <g>
+      <rect width="100" height="100" fill="#009739" />
+      <path d="M50,12 L92,50 L50,88 L8,50 Z" fill="#FEDD00" />
+      <circle cx={50} cy={50} r="20" fill="#002776" />
+    </g>
+  );
+}
+
 const BESPOKE: Record<string, () => React.ReactElement> = {
   uk: BespokeUK,
   usa: BespokeUSA,
   turkey: BespokeTurkey,
   australia: BespokeAustralia,
   singapore: BespokeSingapore,
+  canada: BespokeCanada,
+  brazil: BespokeBrazil,
 };
 
 /**

@@ -21,13 +21,14 @@ export function CheckpointStampsRow({
       </div>
       <div className="flex flex-row gap-4 mt-2 overflow-x-auto pb-1">
         {classified.map((checkpoint) => (
-          <CheckpointMarker
-            key={checkpoint.id}
-            countryCode={checkpoint.country_code}
-            state={checkpoint.state}
-            label={checkpoint.name}
-            size={38}
-          />
+          <div key={checkpoint.id} className="shrink-0">
+            <CheckpointMarker
+              countryCode={checkpoint.country_code}
+              state={checkpoint.state}
+              label={checkpoint.name}
+              size={38}
+            />
+          </div>
         ))}
       </div>
     </div>
