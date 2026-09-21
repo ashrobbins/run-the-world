@@ -1,48 +1,21 @@
+import Link from "next/link";
 import { encodePolyline } from "@/lib/polyline";
+import { interpolatePosition, nearestCheckpointKm, type CheckpointLike } from "@/lib/journeys/map-position";
 
-interface LatLng {
-  lat: number;
-  lng: number;
-}
-
-interface Checkpoint extends LatLng {
+interface Checkpoint extends CheckpointLike {
   name: string;
-  distance_from_start: number;
-}
-
-/** Naive linear interpolation between checkpoints — good enough until real route_geometry exists. */
-function interpolatePosition(checkpoints: Checkpoint[], distanceCompleted: number): LatLng {
-  const sorted = [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
-  const nextIndex = sorted.findIndex((c) => c.distance_from_start > distanceCompleted);
-
-  if (nextIndex <= 0) return sorted[0];
-  if (nextIndex === -1) return sorted[sorted.length - 1];
-
-  const prev = sorted[nextIndex - 1];
-  const next = sorted[nextIndex];
-  const span = next.distance_from_start - prev.distance_from_start;
-  const t = span === 0 ? 0 : (distanceCompleted - prev.distance_from_start) / span;
-
-  return {
-    lat: prev.lat + (next.lat - prev.lat) * t,
-    lng: prev.lng + (next.lng - prev.lng) * t,
-  };
-}
-
-function nearestCheckpointKm(checkpoints: Checkpoint[], distanceCompleted: number): number {
-  return Math.min(
-    ...checkpoints.map((c) => Math.abs(c.distance_from_start - distanceCompleted)),
-  );
 }
 
 const CITY_ZOOM_THRESHOLD_KM = 15;
 
 export function MapCard({
+  userJourneyId,
   checkpoints,
   distanceCompleted,
   locationLabel,
   routeGeometry,
 }: {
+  userJourneyId: string;
   checkpoints: Checkpoint[];
   distanceCompleted: number;
   locationLabel: string;
@@ -68,8 +41,9 @@ export function MapCard({
     : null;
 
   return (
-    <div
-      className="mt-3.5 rounded-2xl border p-3.5 pb-3 relative"
+    <Link
+      href={`/journey/${userJourneyId}/map`}
+      className="mt-3.5 rounded-2xl border p-3.5 pb-3 relative block"
       style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
     >
       {mapUrl ? (
@@ -91,6 +65,6 @@ export function MapCard({
           {locationLabel}
         </span>
       </div>
-    </div>
+    </Link>
   );
 }

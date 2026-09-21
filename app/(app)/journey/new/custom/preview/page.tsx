@@ -4,6 +4,7 @@ import { readPendingRoute, createCustomJourney } from "@/lib/journeys/actions";
 import { haversineDistanceKm } from "@/lib/geo";
 import { targetCheckpointCount } from "@/lib/journeys/route-generator";
 import { CheckpointMarker } from "@/components/checkpoint-marker/CheckpointMarker";
+import { RouteShapeArt } from "@/components/journey/RouteShapeArt";
 
 export default async function RoutePreviewPage() {
   const route = await readPendingRoute();
@@ -26,6 +27,17 @@ export default async function RoutePreviewPage() {
           {route[0].name} &rarr; {route[route.length - 1].name}
         </div>
         <span className="w-5" />
+      </div>
+
+      <div
+        className="rounded-2xl mt-4 p-3"
+        style={{
+          background: "var(--color-accent-light)",
+          backgroundImage: "radial-gradient(#D6D3EF 1px, transparent 1px)",
+          backgroundSize: "14px 14px",
+        }}
+      >
+        <RouteShapeArt points={route} className="w-full h-24" />
       </div>
 
       <div className="flex flex-row items-center gap-2.5 mt-4 overflow-x-auto pb-1">

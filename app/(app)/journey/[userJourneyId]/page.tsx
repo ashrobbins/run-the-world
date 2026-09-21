@@ -96,6 +96,7 @@ export default async function JourneyDetailPage({
           <>
             <CheckpointStampsRow checkpoints={checkpoints} distanceCompleted={userJourney.distance_completed} />
             <MapCard
+              userJourneyId={userJourney.id}
               checkpoints={checkpoints}
               distanceCompleted={userJourney.distance_completed}
               locationLabel={currentLocationLabel}

@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { startCuratedJourney } from "@/lib/journeys/actions";
+import { RouteShapeArt } from "@/components/journey/RouteShapeArt";
+
+// Cycled by index so cards don't all look identical — purely decorative.
+const TILE_STYLES = [
+  { background: "#FDE8DC", stroke: "#E87A4C" },
+  { background: "#EDEBFB", stroke: "#6C5CE7" },
+  { background: "#E1F3EE", stroke: "#1B8A4E" },
+];
 
 export default async function JourneyLibraryPage() {
   const supabase = await createClient();
@@ -13,13 +21,21 @@ export default async function JourneyLibraryPage() {
     .order("name");
 
   const journeyIds = (journeys ?? []).map((j) => j.id);
-  const { data: checkpointCounts } = journeyIds.length
-    ? await supabase.from("checkpoints").select("journey_id").in("journey_id", journeyIds)
-    : { data: [] as { journey_id: string }[] };
+  const { data: checkpointRows } = journeyIds.length
+    ? await supabase
+        .from("checkpoints")
+        .select("journey_id, lat, lng, sequence_number")
+        .in("journey_id", journeyIds)
+        .order("sequence_number", { ascending: true })
+    : { data: [] as { journey_id: string; lat: number; lng: number; sequence_number: number }[] };
 
   const countByJourney = new Map<string, number>();
-  for (const row of checkpointCounts ?? []) {
+  const pointsByJourney = new Map<string, { lat: number; lng: number }[]>();
+  for (const row of checkpointRows ?? []) {
     countByJourney.set(row.journey_id, (countByJourney.get(row.journey_id) ?? 0) + 1);
+    const points = pointsByJourney.get(row.journey_id) ?? [];
+    points.push({ lat: row.lat, lng: row.lng });
+    pointsByJourney.set(row.journey_id, points);
   }
 
   return (
@@ -58,7 +74,10 @@ export default async function JourneyLibraryPage() {
       </h2>
 
       <div className="flex flex-col gap-3">
-        {(journeys ?? []).map((journey) => (
+        {(journeys ?? []).map((journey, index) => {
+          const tileStyle = TILE_STYLES[index % TILE_STYLES.length];
+          const points = pointsByJourney.get(journey.id) ?? [];
+          return (
           <form key={journey.id} action={startCuratedJourney}>
             <input type="hidden" name="journeyId" value={journey.id} />
             <button
@@ -66,6 +85,14 @@ export default async function JourneyLibraryPage() {
               className="w-full text-left flex items-center gap-3 rounded-2xl p-3 border"
               style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
             >
+              <div
+                className="w-12 h-12 rounded-xl shrink-0 overflow-hidden"
+                style={{ background: tileStyle.background }}
+              >
+                {points.length >= 2 && (
+                  <RouteShapeArt points={points} strokeColor={tileStyle.stroke} className="w-full h-full" />
+                )}
+              </div>
               <div className="flex-1">
                 <div className="font-semibold text-sm" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
                   {journey.name}
@@ -80,7 +107,8 @@ export default async function JourneyLibraryPage() {
               <ChevronIcon />
             </button>
           </form>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
