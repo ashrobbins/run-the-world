@@ -41,18 +41,25 @@ export function MapCard({
   checkpoints,
   distanceCompleted,
   locationLabel,
+  routeGeometry,
 }: {
   checkpoints: Checkpoint[];
   distanceCompleted: number;
   locationLabel: string;
+  routeGeometry?: { coordinates: [number, number][] } | null;
 }) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const position = interpolatePosition(checkpoints, distanceCompleted);
   const isNearCity = nearestCheckpointKm(checkpoints, distanceCompleted) <= CITY_ZOOM_THRESHOLD_KM;
   const zoom = isNearCity ? 11 : 4;
 
-  const sortedForPath = [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
-  const encodedPath = encodePolyline(sortedForPath);
+  // Prefer the real road-following geometry (from lib/journeys/road-routing.ts,
+  // computed once at journey creation) when present; fall back to a straight
+  // line through the checkpoints for older/failed journeys.
+  const pathPoints = routeGeometry?.coordinates.length
+    ? routeGeometry.coordinates.map(([lng, lat]) => ({ lat, lng }))
+    : [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
+  const encodedPath = encodePolyline(pathPoints);
   const pathOverlay = `path-3+6C5CE7-0.6(${encodeURIComponent(encodedPath)})`;
   const pinOverlay = `pin-s+6C5CE7(${position.lng},${position.lat})`;
 

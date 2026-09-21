@@ -22,18 +22,21 @@ export interface SyncResult {
  * Strava activity objects fetched here never leave this function's scope — nothing
  * raw is logged, cached, or persisted beyond the four narrow columns on `activities`.
  */
-export async function syncStravaActivities(userId: string): Promise<SyncResult> {
+export async function syncStravaActivities(userId: string, focusJourneyId?: string): Promise<SyncResult> {
   const admin = createAdminClient();
 
-  const { data: userJourney, error: userJourneyError } = await admin
+  // A user can have several active journeys at once — a synced run counts toward
+  // all of them, not just one. `focusJourneyId` (the journey the caller is
+  // currently viewing) picks which one this call's return value reports on.
+  const { data: activeJourneys, error: activeJourneysError } = await admin
     .from("user_journeys")
     .select("id, journey_id, distance_completed")
     .eq("user_id", userId)
-    .eq("status", "active")
-    .single();
-  if (userJourneyError || !userJourney) {
+    .eq("status", "active");
+  if (activeJourneysError || !activeJourneys || activeJourneys.length === 0) {
     throw new Error("No active journey for this user.");
   }
+  const userJourney = activeJourneys.find((uj) => uj.id === focusJourneyId) ?? activeJourneys[0];
 
   const { data: lastKnownActivity } = await admin
     .from("activities")
@@ -80,10 +83,15 @@ export async function syncStravaActivities(userId: string): Promise<SyncResult> 
   const totalDistance = distanceBefore + distanceAdded;
 
   if (distanceAdded > 0) {
-    const { error: updateError } = await admin
-      .from("user_journeys")
-      .update({ distance_completed: totalDistance })
-      .eq("id", userJourney.id);
+    const updates = await Promise.all(
+      activeJourneys.map((uj) =>
+        admin
+          .from("user_journeys")
+          .update({ distance_completed: uj.distance_completed + distanceAdded })
+          .eq("id", uj.id),
+      ),
+    );
+    const updateError = updates.find((r) => r.error)?.error;
     if (updateError) throw updateError;
   }
 

@@ -24,7 +24,7 @@ export default async function JourneyDetailPage({
 
   const { data: userJourney } = await supabase
     .from("user_journeys")
-    .select("id, distance_completed, journey_id, journeys(name, total_distance, start_name, destination_name)")
+    .select("id, distance_completed, journey_id, journeys(name, total_distance, start_name, destination_name, route_geometry)")
     .eq("id", userJourneyId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -99,6 +99,7 @@ export default async function JourneyDetailPage({
               checkpoints={checkpoints}
               distanceCompleted={userJourney.distance_completed}
               locationLabel={currentLocationLabel}
+              routeGeometry={journey.route_geometry as { coordinates: [number, number][] } | null}
             />
           </>
         )}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { submitCustomJourneyForm } from "@/lib/journeys/actions";
+import { PlaceAutocompleteInput } from "@/components/journey/PlaceAutocompleteInput";
 
 export default async function CustomJourneyFormPage({
   searchParams,
@@ -35,9 +36,8 @@ export default async function CustomJourneyFormPage({
             <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
               From
             </label>
-            <input
+            <PlaceAutocompleteInput
               name="from"
-              required
               placeholder="e.g. Wimborne, UK"
               className="block w-full mt-1 text-base font-semibold bg-transparent outline-none"
               style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}
@@ -48,9 +48,8 @@ export default async function CustomJourneyFormPage({
             <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
               To
             </label>
-            <input
+            <PlaceAutocompleteInput
               name="to"
-              required
               placeholder="e.g. Fremantle, Australia"
               className="block w-full mt-1 text-base font-semibold bg-transparent outline-none"
               style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}

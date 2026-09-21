@@ -11,7 +11,11 @@ export function SyncNowButton({ userJourneyId }: { userJourneyId: string }) {
   async function handleSync() {
     setStatus("syncing");
     try {
-      const response = await fetch("/api/sync", { method: "POST" });
+      const response = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userJourneyId }),
+      });
       if (!response.ok) throw new Error("Sync failed");
       const result: SyncResult = await response.json();
 

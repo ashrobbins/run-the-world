@@ -41,3 +41,13 @@ body {
   color: var(--color-text-primary);
   font-family: var(--font-body), system-ui, sans-serif;
 }
+
+button:not(:disabled),
+[role="button"],
+a {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

@@ -24,8 +24,14 @@ export function CheckpointMarker({
   const isGrey = isLocked || isNext;
   const clipId = `${CLIP_ID_PREFIX}-${countryCode}-${state}`;
 
+  // Fixed width (not just the flag's size) so every marker in a row takes up the
+  // same horizontal space regardless of label length — otherwise a long label
+  // (e.g. "Wimborne, UK") widens its own column and throws off the visual
+  // spacing between flags for its neighbors.
+  const width = Math.max(size, 68);
+
   return (
-    <div className="inline-flex flex-col items-center gap-1.5">
+    <div className="inline-flex flex-col items-center gap-1.5" style={{ width }}>
       <div className="relative" style={{ width: size, height: size }}>
         <div
           className="absolute inset-0 rounded-full overflow-hidden"
@@ -63,7 +69,7 @@ export function CheckpointMarker({
       </div>
       {label && (
         <span
-          className="text-[10px] font-semibold whitespace-nowrap"
+          className="text-[10px] font-semibold text-center leading-tight"
           style={{ color: isLocked ? "#B4B4CE" : "#12203D" }}
         >
           {label}

@@ -3,8 +3,10 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/types";
 import { geocodePlace } from "@/lib/geocoding";
 import { haversineDistanceKm } from "@/lib/geo";
+import { computeRoadGeometry } from "@/lib/journeys/road-routing";
 import type { RoutePoint } from "@/lib/journeys/route-generator";
 
 const PENDING_ROUTE_COOKIE = "rtw_pending_route";
@@ -73,7 +75,7 @@ export async function submitCustomJourneyForm(formData: FormData) {
     toLng: String(to.lng),
     toCountry: to.countryCode,
   });
-  redirect(`/journey/new/custom/options?${params.toString()}`);
+  redirect(`/journey/new/custom/confirm?${params.toString()}`);
 }
 
 /** Stashes the chosen route (can be large — up to ~40 waypoints) in a cookie, then previews it. */
@@ -120,6 +122,9 @@ export async function createCustomJourney(formData: FormData) {
     distancesFromStart.push(cumulative);
   }
 
+  // Best-effort — never blocks journey creation if Directions is slow/unavailable.
+  const routeGeometry = await computeRoadGeometry(route).catch(() => null);
+
   const { data: journey, error: journeyError } = await supabase
     .from("journeys")
     .insert({
@@ -134,6 +139,7 @@ export async function createCustomJourney(formData: FormData) {
       destination_lat: end.lat,
       destination_lng: end.lng,
       total_distance: cumulative,
+      route_geometry: routeGeometry as unknown as Json,
       is_published: false,
     })
     .select("id")
