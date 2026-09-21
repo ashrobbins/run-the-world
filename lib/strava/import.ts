@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getValidAccessToken } from "@/lib/strava/oauth";
 import { fetchActivitiesSince } from "@/lib/strava/client";
-import { findNewlyCrossedCheckpoint } from "@/lib/journeys/progress";
+import { applyDistanceToActiveJourneys } from "@/lib/journeys/apply-distance";
 
 const RUNNING_TYPES = new Set(["Run", "TrailRun", "VirtualRun"]);
 const METERS_PER_KM = 1000;
@@ -25,19 +25,6 @@ export interface SyncResult {
 export async function syncStravaActivities(userId: string, focusJourneyId?: string): Promise<SyncResult> {
   const admin = createAdminClient();
 
-  // A user can have several active journeys at once — a synced run counts toward
-  // all of them, not just one. `focusJourneyId` (the journey the caller is
-  // currently viewing) picks which one this call's return value reports on.
-  const { data: activeJourneys, error: activeJourneysError } = await admin
-    .from("user_journeys")
-    .select("id, journey_id, distance_completed")
-    .eq("user_id", userId)
-    .eq("status", "active");
-  if (activeJourneysError || !activeJourneys || activeJourneys.length === 0) {
-    throw new Error("No active journey for this user.");
-  }
-  const userJourney = activeJourneys.find((uj) => uj.id === focusJourneyId) ?? activeJourneys[0];
-
   const { data: lastKnownActivity } = await admin
     .from("activities")
     .select("activity_date")
@@ -59,6 +46,7 @@ export async function syncStravaActivities(userId: string, focusJourneyId?: stri
     .map((a) => ({
       user_id: userId,
       strava_activity_id: a.id,
+      source: "strava" as const,
       activity_type: a.type,
       distance: a.distance / METERS_PER_KM,
       activity_date: a.start_date,
@@ -79,30 +67,7 @@ export async function syncStravaActivities(userId: string, focusJourneyId?: stri
     distanceAdded = (inserted ?? []).reduce((sum, row) => sum + row.distance, 0);
   }
 
-  const distanceBefore = userJourney.distance_completed;
-  const totalDistance = distanceBefore + distanceAdded;
-
-  if (distanceAdded > 0) {
-    const updates = await Promise.all(
-      activeJourneys.map((uj) =>
-        admin
-          .from("user_journeys")
-          .update({ distance_completed: uj.distance_completed + distanceAdded })
-          .eq("id", uj.id),
-      ),
-    );
-    const updateError = updates.find((r) => r.error)?.error;
-    if (updateError) throw updateError;
-  }
-
-  const { data: checkpoints } = await admin
-    .from("checkpoints")
-    .select("id, name, distance_from_start")
-    .eq("journey_id", userJourney.journey_id);
-
-  const crossed = checkpoints
-    ? findNewlyCrossedCheckpoint(checkpoints, distanceBefore, totalDistance)
-    : null;
+  const { totalDistance, crossedCheckpoint } = await applyDistanceToActiveJourneys(userId, distanceAdded, focusJourneyId);
 
   const { data: lastRunRow } = await admin
     .from("activities")
@@ -119,6 +84,6 @@ export async function syncStravaActivities(userId: string, focusJourneyId?: stri
     lastRun: lastRunRow
       ? { distanceKm: lastRunRow.distance, date: lastRunRow.activity_date }
       : null,
-    crossedCheckpoint: crossed ? { id: crossed.id, name: crossed.name } : null,
+    crossedCheckpoint,
   };
 }

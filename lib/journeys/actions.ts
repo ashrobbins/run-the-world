@@ -3,10 +3,13 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/types";
 import { geocodePlace } from "@/lib/geocoding";
 import { haversineDistanceKm } from "@/lib/geo";
 import { computeRoadGeometry } from "@/lib/journeys/road-routing";
+import { applyDistanceToActiveJourneys } from "@/lib/journeys/apply-distance";
+import { convertToKm } from "@/lib/units";
 import type { RoutePoint } from "@/lib/journeys/route-generator";
 
 const PENDING_ROUTE_COOKIE = "rtw_pending_route";
@@ -162,5 +165,58 @@ export async function createCustomJourney(formData: FormData) {
   cookieStore.delete(PENDING_ROUTE_COOKIE);
 
   const userJourneyId = await getOrCreateUserJourney(supabase, user.id, journey.id);
+  redirect(`/journey/${userJourneyId}`);
+}
+
+/** Manually logs a run when Strava sync missed it — same crediting path as syncStravaActivities. */
+export async function logManualActivity(formData: FormData) {
+  const userJourneyId = formData.get("userJourneyId");
+  const distanceRaw = formData.get("distance");
+  const dateRaw = formData.get("date");
+  if (typeof userJourneyId !== "string" || typeof distanceRaw !== "string" || typeof dateRaw !== "string") {
+    throw new Error("Missing fields.");
+  }
+
+  const distanceValue = Number(distanceRaw);
+  if (!Number.isFinite(distanceValue) || distanceValue <= 0) {
+    redirect(`/journey/${userJourneyId}?error=${encodeURIComponent("Enter a distance greater than zero.")}`);
+  }
+
+  const enteredDate = new Date(dateRaw);
+  if (Number.isNaN(enteredDate.getTime()) || enteredDate.getTime() > Date.now()) {
+    redirect(`/journey/${userJourneyId}?error=${encodeURIComponent("Pick a valid date, not in the future.")}`);
+  }
+  // A bare date parses to midnight UTC, which can sort behind a same-day Strava
+  // activity that has a real time-of-day. Use "now" for today's date so a fresh
+  // manual log always reads as the most recent run.
+  const isToday = enteredDate.toDateString() === new Date().toDateString();
+  const activityDate = isToday ? new Date() : enteredDate;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle();
+  const unit = profile?.unit_preference ?? "km";
+  const distanceKm = convertToKm(distanceValue, unit);
+
+  const admin = createAdminClient();
+  const { error: insertError } = await admin.from("activities").insert({
+    user_id: user.id,
+    source: "manual",
+    activity_type: "Run",
+    distance: distanceKm,
+    activity_date: activityDate.toISOString(),
+    counted_for_progress: true,
+  });
+  if (insertError) throw insertError;
+
+  const { crossedCheckpoint } = await applyDistanceToActiveJourneys(user.id, distanceKm, userJourneyId);
+
+  if (crossedCheckpoint) {
+    redirect(`/journey/${userJourneyId}/checkpoint-unlocked?checkpointId=${crossedCheckpoint.id}`);
+  }
   redirect(`/journey/${userJourneyId}`);
 }

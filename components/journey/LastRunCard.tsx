@@ -4,10 +4,12 @@ export function LastRunCard({
   distanceKm,
   date,
   unit,
+  source = "strava",
 }: {
   distanceKm: number;
   date: string;
   unit: UnitPreference;
+  source?: "strava" | "manual";
 }) {
   const formattedDate = new Date(date).toLocaleString(undefined, {
     month: "short",
@@ -27,9 +29,13 @@ export function LastRunCard({
         </span>
         <span
           className="flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full"
-          style={{ background: "#FDECE4", color: "#C24A16" }}
+          style={
+            source === "manual"
+              ? { background: "var(--color-accent-light)", color: "var(--color-accent)" }
+              : { background: "#FDECE4", color: "#C24A16" }
+          }
         >
-          Synced from Strava
+          {source === "manual" ? "Logged manually" : "Synced from Strava"}
         </span>
       </div>
       <div className="flex items-center justify-between mt-2.5">

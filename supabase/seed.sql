@@ -139,3 +139,122 @@ insert into checkpoints (
   ('00000000-0000-0000-0000-000000000005', 'Calais',  'france', 3, 140, 50.9513,  1.8587, 'Arriving in mainland Europe.'),
   ('00000000-0000-0000-0000-000000000005', 'Paris',   'france', 4, 460, 48.8566,  2.3522, 'Journey''s end at the Eiffel Tower.')
 on conflict (journey_id, sequence_number) do nothing;
+
+-- "Did you know?" facts (unlock_content) and landmarks per checkpoint — shown on the
+-- checkpoint quick-view modal and the checkpoint-unlocked celebration screen.
+-- `unlock_content is null` keeps this safe to re-run without clobbering edits.
+
+update checkpoints set unlock_content = 'Winchester was the ancient capital of England before London took over in the 12th century.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Winchester' and unlock_content is null;
+update checkpoints set unlock_content = 'Calais is the closest French port to England — just 34 km across the Channel at its narrowest point.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Calais' and unlock_content is null;
+update checkpoints set unlock_content = 'Reims Cathedral has been the coronation site of 25 French kings, starting with Louis VIII in 1223.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Reims' and unlock_content is null;
+update checkpoints set unlock_content = 'The Eiffel Tower was originally built as a temporary exhibit for the 1889 World''s Fair — it was almost torn down in 1909.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Paris' and unlock_content is null;
+update checkpoints set unlock_content = 'Vienna has been ranked the world''s most liveable city multiple times by the Economist Intelligence Unit.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Vienna' and unlock_content is null;
+update checkpoints set unlock_content = 'Istanbul is the only major city in the world that spans two continents — Europe and Asia.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Istanbul' and unlock_content is null;
+update checkpoints set unlock_content = 'The Sydney Opera House''s roof is covered in over one million glazed tiles.' where journey_id = '00000000-0000-0000-0000-000000000001' and name = 'Sydney' and unlock_content is null;
+
+insert into checkpoint_landmarks (checkpoint_id, name, icon_key, sequence_number)
+select id, v.name, v.icon_key, v.seq from checkpoints c
+join (values
+  ('Winchester', 'Winchester Cathedral', 'cathedral', 1),
+  ('Winchester', 'King Alfred Statue', 'statue', 2),
+  ('Calais', 'Calais Lighthouse', 'tower', 1),
+  ('Calais', 'Burghers of Calais', 'statue', 2),
+  ('Reims', 'Reims Cathedral', 'cathedral', 1),
+  ('Reims', 'Palace of Tau', 'castle', 2),
+  ('Paris', 'Eiffel Tower', 'tower', 1),
+  ('Paris', 'Arc de Triomphe', 'arch', 2),
+  ('Paris', 'Louvre Pyramid', 'pyramid', 3),
+  ('Vienna', 'Schönbrunn Palace', 'castle', 1),
+  ('Vienna', 'St. Stephen''s Cathedral', 'cathedral', 2),
+  ('Istanbul', 'Hagia Sophia', 'cathedral', 1),
+  ('Istanbul', 'Galata Tower', 'tower', 2),
+  ('Istanbul', 'Bosphorus Bridge', 'bridge', 3),
+  ('Sydney', 'Sydney Opera House', 'monument', 1),
+  ('Sydney', 'Sydney Harbour Bridge', 'bridge', 2)
+) as v(cp_name, name, icon_key, seq) on v.cp_name = c.name
+where c.journey_id = '00000000-0000-0000-0000-000000000001'
+on conflict (checkpoint_id, sequence_number) do nothing;
+
+update checkpoints set unlock_content = 'Route 66 was one of the original U.S. highways, established in 1926, stretching 2,448 miles.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Chicago, IL' and unlock_content is null;
+update checkpoints set unlock_content = 'Abraham Lincoln lived in Springfield for over 20 years before becoming president.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Springfield, IL' and unlock_content is null;
+update checkpoints set unlock_content = 'The Gateway Arch is the tallest man-made monument in the Western Hemisphere at 630 feet.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'St Louis, MO' and unlock_content is null;
+update checkpoints set unlock_content = 'Tulsa was once known as the Oil Capital of the World during the early 20th-century oil boom.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Tulsa, OK' and unlock_content is null;
+update checkpoints set unlock_content = 'Oklahoma City''s state capitol is the only one in the US with an active oil well on its grounds.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Oklahoma City, OK' and unlock_content is null;
+update checkpoints set unlock_content = 'Cadillac Ranch consists of ten Cadillacs buried nose-first in the ground, a public art installation since 1974.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Amarillo, TX' and unlock_content is null;
+update checkpoints set unlock_content = 'Flagstaff was the world''s first International Dark Sky City, designated in 2001.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Flagstaff, AZ' and unlock_content is null;
+update checkpoints set unlock_content = 'The Santa Monica Pier marks the official western end of the historic Route 66.' where journey_id = '00000000-0000-0000-0000-000000000002' and name = 'Santa Monica, CA' and unlock_content is null;
+
+insert into checkpoint_landmarks (checkpoint_id, name, icon_key, sequence_number)
+select id, v.name, v.icon_key, v.seq from checkpoints c
+join (values
+  ('Chicago, IL', 'Willis Tower', 'tower', 1),
+  ('Chicago, IL', 'Cloud Gate', 'statue', 2),
+  ('Springfield, IL', 'Lincoln''s Home', 'monument', 1),
+  ('St Louis, MO', 'Gateway Arch', 'arch', 1),
+  ('Tulsa, OK', 'Golden Driller', 'statue', 1),
+  ('Oklahoma City, OK', 'State Capitol', 'monument', 1),
+  ('Amarillo, TX', 'Cadillac Ranch', 'monument', 1),
+  ('Flagstaff, AZ', 'Lowell Observatory', 'tower', 1),
+  ('Flagstaff, AZ', 'San Francisco Peaks', 'mountain', 2),
+  ('Santa Monica, CA', 'Santa Monica Pier', 'bridge', 1)
+) as v(cp_name, name, icon_key, seq) on v.cp_name = c.name
+where c.journey_id = '00000000-0000-0000-0000-000000000002'
+on conflict (checkpoint_id, sequence_number) do nothing;
+
+update checkpoints set unlock_content = 'The Great Wall isn''t a single continuous wall — it''s a series of walls built over 2,000 years by different dynasties.' where journey_id = '00000000-0000-0000-0000-000000000003' and name = 'Beijing' and unlock_content is null;
+update checkpoints set unlock_content = 'Badaling is the most-visited and best-restored section of the Great Wall, receiving millions of visitors a year.' where journey_id = '00000000-0000-0000-0000-000000000003' and name = 'Badaling' and unlock_content is null;
+update checkpoints set unlock_content = 'Mutianyu''s section of the Wall is surrounded by lush forest and is less crowded than Badaling.' where journey_id = '00000000-0000-0000-0000-000000000003' and name = 'Mutianyu' and unlock_content is null;
+update checkpoints set unlock_content = 'Jinshanling is known for having some of the best-preserved original Ming-dynasty brickwork on the entire Wall.' where journey_id = '00000000-0000-0000-0000-000000000003' and name = 'Jinshanling' and unlock_content is null;
+update checkpoints set unlock_content = 'Simatai is one of the few sections of the Wall open for night visits, lit up after dark.' where journey_id = '00000000-0000-0000-0000-000000000003' and name = 'Simatai' and unlock_content is null;
+
+insert into checkpoint_landmarks (checkpoint_id, name, icon_key, sequence_number)
+select id, v.name, v.icon_key, v.seq from checkpoints c
+join (values
+  ('Beijing', 'Forbidden City', 'castle', 1),
+  ('Beijing', 'Temple of Heaven', 'cathedral', 2),
+  ('Badaling', 'Badaling Watchtower', 'tower', 1),
+  ('Mutianyu', 'Mutianyu Watchtowers', 'tower', 1),
+  ('Jinshanling', 'Jinshanling Towers', 'tower', 1),
+  ('Simatai', 'Simatai Watchtower', 'castle', 1)
+) as v(cp_name, name, icon_key, seq) on v.cp_name = c.name
+where c.journey_id = '00000000-0000-0000-0000-000000000003'
+on conflict (checkpoint_id, sequence_number) do nothing;
+
+update checkpoints set unlock_content = 'Pilgrims have walked the Camino de Santiago for over 1,000 years, since the 9th century.' where journey_id = '00000000-0000-0000-0000-000000000004' and name = 'Saint-Jean-Pied-de-Port' and unlock_content is null;
+update checkpoints set unlock_content = 'Pamplona''s Running of the Bulls (Sanfermines) takes place every July and dates back to the 14th century.' where journey_id = '00000000-0000-0000-0000-000000000004' and name = 'Pamplona' and unlock_content is null;
+update checkpoints set unlock_content = 'Burgos Cathedral is a UNESCO World Heritage Site and took over 300 years to complete.' where journey_id = '00000000-0000-0000-0000-000000000004' and name = 'Burgos' and unlock_content is null;
+update checkpoints set unlock_content = 'León Cathedral is famous for having more stained glass than almost any other Gothic cathedral in the world.' where journey_id = '00000000-0000-0000-0000-000000000004' and name = 'Leon' and unlock_content is null;
+update checkpoints set unlock_content = 'The Knights Templar built the castle at Ponferrada in the 12th century to protect pilgrims on the Camino.' where journey_id = '00000000-0000-0000-0000-000000000004' and name = 'Ponferrada' and unlock_content is null;
+update checkpoints set unlock_content = 'Legend holds that the remains of the apostle St. James are buried beneath Santiago Cathedral.' where journey_id = '00000000-0000-0000-0000-000000000004' and name = 'Santiago de Compostela' and unlock_content is null;
+
+insert into checkpoint_landmarks (checkpoint_id, name, icon_key, sequence_number)
+select id, v.name, v.icon_key, v.seq from checkpoints c
+join (values
+  ('Saint-Jean-Pied-de-Port', 'Citadel of Saint-Jean', 'castle', 1),
+  ('Pamplona', 'Pamplona Bull Ring', 'monument', 1),
+  ('Burgos', 'Burgos Cathedral', 'cathedral', 1),
+  ('Leon', 'León Cathedral', 'cathedral', 1),
+  ('Ponferrada', 'Templar Castle', 'castle', 1),
+  ('Santiago de Compostela', 'Santiago Cathedral', 'cathedral', 1)
+) as v(cp_name, name, icon_key, seq) on v.cp_name = c.name
+where c.journey_id = '00000000-0000-0000-0000-000000000004'
+on conflict (checkpoint_id, sequence_number) do nothing;
+
+update checkpoints set unlock_content = 'Big Ben is actually the name of the bell inside the tower, not the tower itself — officially the Elizabeth Tower.' where journey_id = '00000000-0000-0000-0000-000000000005' and name = 'London' and unlock_content is null;
+update checkpoints set unlock_content = 'The White Cliffs of Dover are made of soft chalk deposited over 66 million years ago.' where journey_id = '00000000-0000-0000-0000-000000000005' and name = 'Dover' and unlock_content is null;
+update checkpoints set unlock_content = 'On a clear day, you can see the White Cliffs of Dover from the beaches of Calais.' where journey_id = '00000000-0000-0000-0000-000000000005' and name = 'Calais' and unlock_content is null;
+update checkpoints set unlock_content = 'Notre-Dame de Paris took nearly 200 years to build, from 1163 to around 1345.' where journey_id = '00000000-0000-0000-0000-000000000005' and name = 'Paris' and unlock_content is null;
+
+insert into checkpoint_landmarks (checkpoint_id, name, icon_key, sequence_number)
+select id, v.name, v.icon_key, v.seq from checkpoints c
+join (values
+  ('London', 'Big Ben', 'tower', 1),
+  ('London', 'Tower Bridge', 'bridge', 2),
+  ('Dover', 'Dover Castle', 'castle', 1),
+  ('Dover', 'The White Cliffs', 'mountain', 2),
+  ('Calais', 'Calais Lighthouse', 'tower', 1),
+  ('Paris', 'Eiffel Tower', 'tower', 1),
+  ('Paris', 'Notre-Dame', 'cathedral', 2)
+) as v(cp_name, name, icon_key, seq) on v.cp_name = c.name
+where c.journey_id = '00000000-0000-0000-0000-000000000005'
+on conflict (checkpoint_id, sequence_number) do nothing;

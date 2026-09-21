@@ -12,3 +12,8 @@ export function formatDistance(km: number, unit: UnitPreference): string {
 export function convertKmTo(km: number, unit: UnitPreference): number {
   return unit === "mi" ? km * KM_TO_MI : km;
 }
+
+/** Inverse of convertKmTo — converts a value in the given unit back to km for storage. */
+export function convertToKm(value: number, unit: UnitPreference): number {
+  return unit === "mi" ? value / KM_TO_MI : value;
+}

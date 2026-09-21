@@ -137,22 +137,46 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          strava_activity_id: number;
+          strava_activity_id: number | null;
           activity_type: string;
           distance: number;
           activity_date: string;
           counted_for_progress: boolean;
+          source: "strava" | "manual";
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["activities"]["Row"]> & {
           user_id: string;
-          strava_activity_id: number;
           activity_type: string;
           distance: number;
           activity_date: string;
         };
         Update: Partial<Database["public"]["Tables"]["activities"]["Row"]>;
         Relationships: [];
+      };
+      checkpoint_landmarks: {
+        Row: {
+          id: string;
+          checkpoint_id: string;
+          name: string;
+          icon_key: string;
+          sequence_number: number;
+        };
+        Insert: Partial<Database["public"]["Tables"]["checkpoint_landmarks"]["Row"]> & {
+          checkpoint_id: string;
+          name: string;
+          icon_key: string;
+          sequence_number: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["checkpoint_landmarks"]["Row"]>;
+        Relationships: [
+          {
+            foreignKeyName: "checkpoint_landmarks_checkpoint_id_fkey";
+            columns: ["checkpoint_id"];
+            referencedRelation: "checkpoints";
+            referencedColumns: ["id"];
+          },
+        ];
       };
     };
     Views: Record<string, never>;

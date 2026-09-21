@@ -6,10 +6,13 @@ import { InteractiveJourneyMap } from "@/components/journey/InteractiveJourneyMa
 
 export default async function JourneyMapPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ userJourneyId: string }>;
+  searchParams: Promise<{ focus?: string }>;
 }) {
   const { userJourneyId } = await params;
+  const { focus } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -45,6 +48,7 @@ export default async function JourneyMapPage({
   const classified = classifyCheckpoints(checkpoints, userJourney.distance_completed);
   const nextCheckpoint = classified.find((c) => c.state === "next");
   const currentLocationLabel = nextCheckpoint ? `Somewhere before ${nextCheckpoint.name}` : "Journey complete";
+  const focusCheckpoint = focus ? checkpoints.find((c) => c.id === focus) : undefined;
 
   return (
     <InteractiveJourneyMap
@@ -55,6 +59,7 @@ export default async function JourneyMapPage({
       totalDistance={checkpoints[checkpoints.length - 1].distance_from_start}
       routeGeometry={journey.route_geometry as { coordinates: [number, number][] } | null}
       currentLocationLabel={currentLocationLabel}
+      focusCheckpoint={focusCheckpoint ? { lat: focusCheckpoint.lat, lng: focusCheckpoint.lng, name: focusCheckpoint.name } : null}
       nextCheckpoint={
         nextCheckpoint
           ? {

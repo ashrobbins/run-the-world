@@ -6,6 +6,7 @@ import { CheckpointStampsRow } from "@/components/journey/CheckpointStampsRow";
 import { MapCard } from "@/components/journey/MapCard";
 import { LastRunCard } from "@/components/journey/LastRunCard";
 import { DeleteJourneyButton } from "@/components/journey/DeleteJourneyButton";
+import { ManualLogButton } from "@/components/journey/ManualLogButton";
 import { SyncNowButton } from "@/components/strava/SyncNowButton";
 import { classifyCheckpoints } from "@/lib/journeys/progress";
 import { formatDistance } from "@/lib/units";
@@ -35,11 +36,16 @@ export default async function JourneyDetailPage({
   const routeLabel = `${journey.start_name} → ${journey.destination_name}`;
   const showRouteLabel = journey.name !== routeLabel;
 
-  const { data: checkpoints } = await supabase
+  const { data: checkpointRows } = await supabase
     .from("checkpoints")
-    .select("id, name, country_code, distance_from_start, lat, lng")
+    .select("id, name, country_code, distance_from_start, lat, lng, checkpoint_landmarks(name, icon_key, sequence_number)")
     .eq("journey_id", userJourney.journey_id)
     .order("sequence_number", { ascending: true });
+
+  const checkpoints = checkpointRows?.map((c) => ({
+    ...c,
+    landmarks: [...(c.checkpoint_landmarks ?? [])].sort((a, b) => a.sequence_number - b.sequence_number),
+  }));
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -50,7 +56,7 @@ export default async function JourneyDetailPage({
 
   const { data: lastActivity } = await supabase
     .from("activities")
-    .select("distance, activity_date")
+    .select("distance, activity_date, source")
     .eq("user_id", user.id)
     .order("activity_date", { ascending: false })
     .limit(1)
@@ -94,7 +100,14 @@ export default async function JourneyDetailPage({
 
         {checkpoints && checkpoints.length > 0 && (
           <>
-            <CheckpointStampsRow checkpoints={checkpoints} distanceCompleted={userJourney.distance_completed} />
+            <CheckpointStampsRow
+              userJourneyId={userJourney.id}
+              routeLabel={routeLabel}
+              checkpoints={checkpoints}
+              distanceCompleted={userJourney.distance_completed}
+              unit={unit}
+              lastActivityDate={lastActivity?.activity_date ?? null}
+            />
             <MapCard
               userJourneyId={userJourney.id}
               checkpoints={checkpoints}
@@ -106,7 +119,7 @@ export default async function JourneyDetailPage({
         )}
 
         {lastActivity && (
-          <LastRunCard distanceKm={lastActivity.distance} date={lastActivity.activity_date} unit={unit} />
+          <LastRunCard distanceKm={lastActivity.distance} date={lastActivity.activity_date} unit={unit} source={lastActivity.source} />
         )}
 
         {nextCheckpoint && (
@@ -128,10 +141,7 @@ export default async function JourneyDetailPage({
 
         <SyncNowButton userJourneyId={userJourney.id} />
 
-        <p className="text-center text-xs mt-3" style={{ color: "var(--color-text-faint)" }}>
-          Strava sync missed a run?{" "}
-          <span style={{ color: "var(--color-text-secondary)" }}>Log it manually (coming soon)</span>
-        </p>
+        <ManualLogButton userJourneyId={userJourney.id} unit={unit} />
 
         <div className="flex justify-center mt-3 pb-4">
           <DeleteJourneyButton userJourneyId={userJourney.id} journeyName={journey.name} />

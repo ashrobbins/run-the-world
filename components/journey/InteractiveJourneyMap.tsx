@@ -31,6 +31,7 @@ export function InteractiveJourneyMap({
   routeGeometry,
   currentLocationLabel,
   nextCheckpoint,
+  focusCheckpoint,
 }: {
   userJourneyId: string;
   routeLabel: string;
@@ -40,6 +41,7 @@ export function InteractiveJourneyMap({
   routeGeometry?: { coordinates: [number, number][] } | null;
   currentLocationLabel: string;
   nextCheckpoint: { name: string; distanceAwayLabel: string } | null;
+  focusCheckpoint?: { lat: number; lng: number; name: string } | null;
 }) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -70,8 +72,8 @@ export function InteractiveJourneyMap({
       const map = new mapboxgl.Map({
         container: containerRef.current,
         style: "mapbox://styles/mapbox/streets-v12",
-        center: [position.lng, position.lat],
-        zoom: 5,
+        center: focusCheckpoint ? [focusCheckpoint.lng, focusCheckpoint.lat] : [position.lng, position.lat],
+        zoom: focusCheckpoint ? 10 : 5,
       });
       mapRef.current = map;
 
@@ -100,6 +102,14 @@ export function InteractiveJourneyMap({
           new mapboxgl.Marker({ color: "#FFFFFF" })
             .setLngLat([nextCheckpointPoint.lng, nextCheckpointPoint.lat])
             .addTo(map);
+        }
+
+        if (focusCheckpoint) {
+          new mapboxgl.Marker({ color: "#E87A4C" })
+            .setLngLat([focusCheckpoint.lng, focusCheckpoint.lat])
+            .setPopup(new mapboxgl.Popup({ offset: 24, closeButton: false }).setText(focusCheckpoint.name))
+            .addTo(map)
+            .togglePopup();
         }
       });
     })();
