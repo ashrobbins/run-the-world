@@ -258,3 +258,124 @@ join (values
 ) as v(cp_name, name, icon_key, seq) on v.cp_name = c.name
 where c.journey_id = '00000000-0000-0000-0000-000000000005'
 on conflict (checkpoint_id, sequence_number) do nothing;
+
+-- The 92 Club: a ground-hopping tour of every club across the top four English
+-- divisions (Premier League, Championship, League One, League Two).
+insert into journeys (
+  id, name, description, journey_type,
+  start_name, start_lat, start_lng,
+  destination_name, destination_lat, destination_lng,
+  total_distance, is_published
+) values (
+  '00000000-0000-0000-0000-000000000006',
+  'The 92 Club',
+  'A ground-hopping tour of all 92 clubs across the Premier League, Championship, League One, and League Two.',
+  'curated',
+  'Plymouth Argyle', 50.380346, -4.168399,
+  'Swansea City', 51.619596, -3.945925,
+  2914.5, true
+) on conflict (id) do nothing;
+
+insert into checkpoints (
+  journey_id, name, country_code, sequence_number, distance_from_start, lat, lng, description
+) values
+  ('00000000-0000-0000-0000-000000000006', 'Plymouth Argyle', 'uk', 1, 0, 50.380346, -4.168399, 'Home of Plymouth Argyle — Home Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Exeter City', 'uk', 2, 59.1, 50.7266, -3.5334, 'Home of Exeter City — St James Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Cardiff City', 'uk', 3, 147.6, 51.488858, -3.168129, 'Home of Cardiff City — Cardiff City Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Newport County', 'uk', 4, 164.2, 51.588548, -2.989782, 'Home of Newport County — Rodney Parade.'),
+  ('00000000-0000-0000-0000-000000000006', 'Bristol Rovers', 'uk', 5, 193.6, 51.484253, -2.59953, 'Home of Bristol Rovers — Memorial Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Bristol City', 'uk', 6, 198.4, 51.44214, -2.613509, 'Home of Bristol City — Ashton Gate.'),
+  ('00000000-0000-0000-0000-000000000006', 'Swindon Town', 'uk', 7, 258.1, 51.566264, -1.773482, 'Home of Swindon Town — County Ground.'),
+  ('00000000-0000-0000-0000-000000000006', 'Oxford United', 'uk', 8, 299.3, 51.75355, -1.258646, 'Home of Oxford United — Kassam Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Wycombe Wanderers', 'uk', 9, 336.9, 51.629547, -0.751436, 'Home of Wycombe Wanderers — Adams Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Watford', 'uk', 10, 360.9, 51.649516, -0.40509, 'Home of Watford — Vicarage Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Barnet', 'uk', 11, 370.5, 51.6117, -0.2802, 'Home of Barnet — The Hive Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Queens Park Rangers', 'uk', 12, 382.5, 51.508096, -0.230514, 'Home of Queens Park Rangers — Loftus Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Fulham', 'uk', 13, 386.2, 51.475, -0.2217, 'Home of Fulham — Craven Cottage.'),
+  ('00000000-0000-0000-0000-000000000006', 'Chelsea', 'uk', 14, 388.5, 51.4816, -0.191, 'Home of Chelsea — Stamford Bridge.'),
+  ('00000000-0000-0000-0000-000000000006', 'Brentford', 'uk', 15, 395.3, 51.4906, -0.2886, 'Home of Brentford — Gtech Community Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Arsenal', 'uk', 16, 409.7, 51.5549, -0.1084, 'Home of Arsenal — Emirates Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Tottenham Hotspur', 'uk', 17, 415.9, 51.6043, -0.0662, 'Home of Tottenham Hotspur — Tottenham Hotspur Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Leyton Orient', 'uk', 18, 422.1, 51.560029, -0.011387, 'Home of Leyton Orient — Brisbane Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'West Ham United', 'uk', 19, 424.5, 51.5386, -0.0166, 'Home of West Ham United — London Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Millwall', 'uk', 20, 430.8, 51.4864, -0.0508, 'Home of Millwall — The Den.'),
+  ('00000000-0000-0000-0000-000000000006', 'AFC Wimbledon', 'uk', 21, 435.2, 51.449799, -0.073757, 'Home of AFC Wimbledon — Plough Lane.'),
+  ('00000000-0000-0000-0000-000000000006', 'Crystal Palace', 'uk', 22, 440.9, 51.3983, -0.0855, 'Home of Crystal Palace — Selhurst Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Bromley', 'uk', 23, 448.2, 51.387547, 0.017514, 'Home of Bromley — Hayes Lane.'),
+  ('00000000-0000-0000-0000-000000000006', 'Charlton Athletic', 'uk', 24, 459.2, 51.4861, 0.0362, 'Home of Charlton Athletic — The Valley.'),
+  ('00000000-0000-0000-0000-000000000006', 'Gillingham', 'uk', 25, 497.1, 51.38508, 0.558206, 'Home of Gillingham — Priestfield Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Colchester United', 'uk', 26, 557.2, 51.87836, 0.915004, 'Home of Colchester United — Weston Homes Community Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Ipswich Town', 'uk', 27, 582.4, 52.055, 1.1447, 'Home of Ipswich Town — Portman Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Norwich City', 'uk', 28, 646.7, 52.623797, 1.31406, 'Home of Norwich City — Carrow Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Cambridge United', 'uk', 29, 737.6, 52.2058, 0.1614, 'Home of Cambridge United — Abbey Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Stevenage', 'uk', 30, 779.6, 51.901363, -0.202337, 'Home of Stevenage — Lamex Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Luton Town', 'uk', 31, 795.4, 51.884022, -0.429791, 'Home of Luton Town — Kenilworth Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Milton Keynes Dons', 'uk', 32, 824, 52.043182, -0.757416, 'Home of Milton Keynes Dons — Stadium MK.'),
+  ('00000000-0000-0000-0000-000000000006', 'Northampton Town', 'uk', 33, 847.6, 52.238144, -0.895914, 'Home of Northampton Town — Sixfields Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Coventry City', 'uk', 34, 894.5, 52.4483, -1.4952, 'Home of Coventry City — Coventry Building Society Arena.'),
+  ('00000000-0000-0000-0000-000000000006', 'Birmingham City', 'uk', 35, 920.3, 52.476645, -1.872329, 'Home of Birmingham City — St Andrew''s.'),
+  ('00000000-0000-0000-0000-000000000006', 'Aston Villa', 'uk', 36, 924, 52.5092, -1.8848, 'Home of Aston Villa — Villa Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'West Bromwich Albion', 'uk', 37, 933.4, 52.536909, -2.016442, 'Home of West Bromwich Albion — The Hawthorns.'),
+  ('00000000-0000-0000-0000-000000000006', 'Walsall', 'uk', 38, 937.3, 52.57026, -1.998986, 'Home of Walsall — Bescot Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Wolverhampton Wanderers', 'uk', 39, 946.4, 52.591035, -2.12843, 'Home of Wolverhampton Wanderers — Molineux Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Burton Albion', 'uk', 40, 987.3, 52.80316, -1.631388, 'Home of Burton Albion — Pirelli Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Derby County', 'uk', 41, 1004.3, 52.91205, -1.453314, 'Home of Derby County — Pride Park Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Notts County', 'uk', 42, 1026, 52.937, -1.1333, 'Home of Notts County — Meadow Lane.'),
+  ('00000000-0000-0000-0000-000000000006', 'Nottingham Forest', 'uk', 43, 1026.3, 52.9399, -1.1327, 'Home of Nottingham Forest — City Ground.'),
+  ('00000000-0000-0000-0000-000000000006', 'Mansfield Town', 'uk', 44, 1049.4, 53.14438, -1.196964, 'Home of Mansfield Town — One Call Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Chesterfield', 'uk', 45, 1067.9, 53.23586, -1.427393, 'Home of Chesterfield — SMH Group Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Sheffield United', 'uk', 46, 1082.9, 53.368754, -1.471667, 'Home of Sheffield United — Bramall Lane.'),
+  ('00000000-0000-0000-0000-000000000006', 'Sheffield Wednesday', 'uk', 47, 1087.4, 53.404125, -1.503411, 'Home of Sheffield Wednesday — Hillsborough Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Rotherham United', 'uk', 48, 1097.1, 53.428976, -1.362403, 'Home of Rotherham United — New York Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Barnsley', 'uk', 49, 1112.5, 53.54927, -1.475716, 'Home of Barnsley — Oakwell.'),
+  ('00000000-0000-0000-0000-000000000006', 'Huddersfield Town', 'uk', 50, 1135.4, 53.6464, -1.78202, 'Home of Huddersfield Town — Accu Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Bradford City', 'uk', 51, 1152.9, 53.803732, -1.76029, 'Home of Bradford City — Valley Parade.'),
+  ('00000000-0000-0000-0000-000000000006', 'Leeds United', 'uk', 52, 1165.6, 53.7778, -1.572, 'Home of Leeds United — Elland Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'York City', 'uk', 53, 1203.6, 53.959526, -1.081793, 'Home of York City — LNER Community Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Doncaster Rovers', 'uk', 54, 1252.2, 53.5228, -1.1017, 'Home of Doncaster Rovers — Eco-Power Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Lincoln City', 'uk', 55, 1302.2, 53.221762, -0.540476, 'Home of Lincoln City — Sincil Bank.'),
+  ('00000000-0000-0000-0000-000000000006', 'Grimsby Town', 'uk', 56, 1352.9, 53.56031, -0.028589, 'Home of Grimsby Town — Blundell Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Hull City', 'uk', 57, 1383.3, 53.7461, -0.3671, 'Home of Hull City — MKM Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Middlesbrough', 'uk', 58, 1492.2, 54.599574, -1.186718, 'Home of Middlesbrough — Riverside Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Sunderland', 'uk', 59, 1529.5, 54.9144, -1.3883, 'Home of Sunderland — Stadium of Light.'),
+  ('00000000-0000-0000-0000-000000000006', 'Newcastle United', 'uk', 60, 1545.9, 54.9756, -1.6217, 'Home of Newcastle United — St James'' Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Burnley', 'uk', 61, 1683.8, 53.788668, -2.236437, 'Home of Burnley — Turf Moor.'),
+  ('00000000-0000-0000-0000-000000000006', 'Accrington Stanley', 'uk', 62, 1693.1, 53.752964, -2.365044, 'Home of Accrington Stanley — Wham Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Blackburn Rovers', 'uk', 63, 1701.8, 53.7288, -2.491352, 'Home of Blackburn Rovers — Ewood Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Preston North End', 'uk', 64, 1715.8, 53.77407, -2.689936, 'Home of Preston North End — Deepdale.'),
+  ('00000000-0000-0000-0000-000000000006', 'Blackpool', 'uk', 65, 1739.2, 53.804309, -3.042006, 'Home of Blackpool — Bloomfield Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Fleetwood Town', 'uk', 66, 1751.8, 53.916899, -3.027022, 'Home of Fleetwood Town — Highbury Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Wigan Athletic', 'uk', 67, 1800.5, 53.54607, -2.631824, 'Home of Wigan Athletic — DW Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Bolton Wanderers', 'uk', 68, 1814.4, 53.578987, -2.428225, 'Home of Bolton Wanderers — Toughsheet Community Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Salford City', 'uk', 69, 1826.7, 53.513739, -2.279341, 'Home of Salford City — Moor Lane.'),
+  ('00000000-0000-0000-0000-000000000006', 'Manchester United', 'uk', 70, 1832.3, 53.4631, -2.2913, 'Home of Manchester United — Old Trafford.'),
+  ('00000000-0000-0000-0000-000000000006', 'Manchester City', 'uk', 71, 1838.8, 53.4831, -2.2004, 'Home of Manchester City — Etihad Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Oldham Athletic', 'uk', 72, 1847.9, 53.553999, -2.13069, 'Home of Oldham Athletic — Boundary Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Rochdale', 'uk', 73, 1853.7, 53.605851, -2.144662, 'Home of Rochdale — Crown Oil Arena.'),
+  ('00000000-0000-0000-0000-000000000006', 'Stockport County', 'uk', 74, 1876.6, 53.40104, -2.169646, 'Home of Stockport County — Edgeley Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Crewe Alexandra', 'uk', 75, 1915, 53.097829, -2.445733, 'Home of Crewe Alexandra — Mornflake Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Port Vale', 'uk', 76, 1932.6, 53.05, -2.1936, 'Home of Port Vale — Vale Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Stoke City', 'uk', 77, 1934.3, 53.034766, -2.189182, 'Home of Stoke City — bet365 Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Shrewsbury Town', 'uk', 78, 1988.2, 52.6892, -2.7513, 'Home of Shrewsbury Town — Croud Meadow.'),
+  ('00000000-0000-0000-0000-000000000006', 'Wrexham', 'uk', 79, 2031.2, 53.0453, -3.0002, 'Home of Wrexham — Racecourse Ground.'),
+  ('00000000-0000-0000-0000-000000000006', 'Tranmere Rovers', 'uk', 80, 2068, 53.375396, -3.034846, 'Home of Tranmere Rovers — Prenton Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Liverpool', 'uk', 81, 2075.8, 53.4308, -2.9608, 'Home of Liverpool — Anfield.'),
+  ('00000000-0000-0000-0000-000000000006', 'Everton', 'uk', 82, 2078.7, 53.4478, -2.9925, 'Home of Everton — Everton Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Leicester City', 'uk', 83, 2230.5, 52.654876, -1.142562, 'Home of Leicester City — King Power Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Peterborough United', 'uk', 84, 2292, 52.549171, -0.249502, 'Home of Peterborough United — London Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Reading', 'uk', 85, 2423.2, 51.455647, -0.972165, 'Home of Reading — Select Car Leasing Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Crawley Town', 'uk', 86, 2490.9, 51.0956, -0.1874, 'Home of Crawley Town — Broadfield Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Brighton & Hove Albion', 'uk', 87, 2517.9, 50.8617, -0.0837, 'Home of Brighton & Hove Albion — Amex Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Portsmouth', 'uk', 88, 2588, 50.79816, -1.07687, 'Home of Portsmouth — Fratton Park.'),
+  ('00000000-0000-0000-0000-000000000006', 'Southampton', 'uk', 89, 2613.5, 50.905315, -1.39774, 'Home of Southampton — St Mary''s Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'AFC Bournemouth', 'uk', 90, 2649.8, 50.7352, -1.8387, 'Home of AFC Bournemouth — Vitality Stadium.'),
+  ('00000000-0000-0000-0000-000000000006', 'Cheltenham Town', 'uk', 91, 2780.7, 51.904506, -2.057559, 'Home of Cheltenham Town — Whaddon Road.'),
+  ('00000000-0000-0000-0000-000000000006', 'Swansea City', 'uk', 92, 2914.5, 51.619596, -3.945925, 'Home of Swansea City — Swansea.com Stadium.')
+on conflict (journey_id, sequence_number) do nothing;
+
+-- Unpublish the retired curated journeys (kept in the table — not deleted — so any
+-- existing user progress against them is preserved).
+update journeys set is_published = false where id in (
+  '00000000-0000-0000-0000-000000000001', -- Winchester -> Sydney
+  '00000000-0000-0000-0000-000000000004'  -- Camino de Santiago
+);
