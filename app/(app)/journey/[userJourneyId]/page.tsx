@@ -7,6 +7,7 @@ import { MapCard } from "@/components/journey/MapCard";
 import { LastRunCard } from "@/components/journey/LastRunCard";
 import { DeleteJourneyButton } from "@/components/journey/DeleteJourneyButton";
 import { ManualLogButton } from "@/components/journey/ManualLogButton";
+import { JourneyProgressTicker } from "@/components/journey/JourneyProgressTicker";
 import { SyncNowButton } from "@/components/strava/SyncNowButton";
 import { classifyCheckpoints } from "@/lib/journeys/progress";
 import { formatDistance } from "@/lib/units";
@@ -71,6 +72,12 @@ export default async function JourneyDetailPage({
 
   return (
     <div className="flex flex-col min-h-full">
+      <JourneyProgressTicker
+        userJourneyId={userJourney.id}
+        distanceCompleted={userJourney.distance_completed}
+        totalDistance={journey.total_distance}
+        unit={unit}
+      />
       <div className="flex flex-row items-center justify-between px-6 pt-5 pb-1">
         <Link href="/home" aria-label="Back">
           <BackIcon />
@@ -139,7 +146,7 @@ export default async function JourneyDetailPage({
           </div>
         )}
 
-        <SyncNowButton userJourneyId={userJourney.id} />
+        <SyncNowButton userJourneyId={userJourney.id} unit={unit} />
 
         <ManualLogButton userJourneyId={userJourney.id} unit={unit} />
 

@@ -5,6 +5,12 @@ import { findNewlyCrossedCheckpoint } from "@/lib/journeys/progress";
 export interface ApplyDistanceResult {
   totalDistance: number; // km, the focus journey's total after this
   crossedCheckpoint: { id: string; name: string } | null;
+  journeysCredited: number;
+  /** The user_journeys.id this result reports on — the caller's focusJourneyId
+   * when given, otherwise whichever active journey was picked by default. Lets a
+   * caller with no journey context (e.g. background auto-sync) still link to the
+   * right place if a checkpoint was crossed. */
+  focusUserJourneyId: string;
 }
 
 /**
@@ -55,5 +61,7 @@ export async function applyDistanceToActiveJourneys(
   return {
     totalDistance,
     crossedCheckpoint: crossed ? { id: crossed.id, name: crossed.name } : null,
+    journeysCredited: distanceAdded > 0 ? activeJourneys.length : 0,
+    focusUserJourneyId: userJourney.id,
   };
 }

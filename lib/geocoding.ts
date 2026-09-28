@@ -42,3 +42,36 @@ export async function geocodePlace(query: string): Promise<GeocodedPlace | null>
 
   return { name, lat, lng, countryCode };
 }
+
+/** Reverse-geocodes coordinates to a short "City, CC" label, e.g. for showing a
+ * run's general location. Returns null on no match or any request failure —
+ * this is a nice-to-have label, never worth failing a sync over. */
+export async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  if (!token) return null;
+
+  try {
+    const url = new URL(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json`);
+    url.searchParams.set("access_token", token);
+    url.searchParams.set("limit", "1");
+    url.searchParams.set("types", "place,locality");
+
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const feature = data.features?.[0];
+    if (!feature) return null;
+
+    const countryContext = (feature.context as Array<{ id: string; short_code?: string }> | undefined)?.find(
+      (c) => c.id.startsWith("country"),
+    );
+    const isoCode = countryContext?.short_code?.toLowerCase();
+    const displayCode = isoCode ? (isoCode === "gb" ? "UK" : isoCode.toUpperCase()) : undefined;
+    const shortName = feature.text as string;
+
+    return displayCode ? `${shortName}, ${displayCode}` : shortName;
+  } catch {
+    return null;
+  }
+}
