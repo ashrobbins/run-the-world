@@ -5,9 +5,6 @@ import { LinkWithStravaCta } from "@/components/strava/LinkWithStravaCta";
 import { formatDistance, type UnitPreference } from "@/lib/units";
 import { classifyCheckpoints, type CheckpointState } from "@/lib/journeys/progress";
 
-// Seeded for brand-new connected users only — see supabase/seed.sql.
-const SEEDED_JOURNEY_ID = "00000000-0000-0000-0000-000000000001";
-
 interface JourneyCardData {
   userJourneyId: string;
   name: string;
@@ -50,24 +47,13 @@ export default async function HomePage() {
     );
   }
 
-  let { data: userJourneys } = await supabase
+  const { data: userJourneysRaw } = await supabase
     .from("user_journeys")
     .select("id, distance_completed, journeys(id, name, total_distance, start_name, destination_name)")
     .eq("user_id", user.id)
     .eq("status", "active")
     .order("started_at", { ascending: true });
-
-  // First-time connected user with no journeys at all: give them the seeded one so
-  // Home isn't empty. Anyone who already has a journey (seeded, curated, or custom)
-  // is left alone — we don't keep force-creating this.
-  if (!userJourneys || userJourneys.length === 0) {
-    const { data: created } = await supabase
-      .from("user_journeys")
-      .insert({ user_id: user.id, journey_id: SEEDED_JOURNEY_ID })
-      .select("id, distance_completed, journeys(id, name, total_distance, start_name, destination_name)")
-      .single();
-    userJourneys = created ? [created] : [];
-  }
+  const userJourneys = userJourneysRaw ?? [];
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -163,8 +149,9 @@ export default async function HomePage() {
           {greeting}
         </div>
         <p className="text-sm font-medium mt-1.5" style={{ color: "var(--color-text-secondary)" }}>
-          You&rsquo;ve run {formatDistance(totalDistanceAllJourneys, unit)} across {cards.length} journey
-          {cards.length === 1 ? "" : "s"}
+          {cards.length === 0
+            ? "Pick a journey and your runs will start moving you along it."
+            : `You’ve run ${formatDistance(totalDistanceAllJourneys, unit)} across ${cards.length} journey${cards.length === 1 ? "" : "s"}`}
         </p>
       </div>
 
@@ -232,70 +219,93 @@ export default async function HomePage() {
 
       {/* Journeys */}
       <div className="px-6 pt-6 pb-6">
-        <h1 className="text-base font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
-          Your journeys
-        </h1>
+        {cards.length === 0 ? (
+          <Link
+            href="/journey/new"
+            className="block rounded-2xl p-5 text-center"
+            style={{ background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)", boxShadow: "var(--shadow-card)" }}
+          >
+            <div className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
+              Start your first journey
+            </div>
+            <p className="text-sm mt-1.5" style={{ color: "rgba(255,255,255,0.8)" }}>
+              Pick a curated route or plan your own — your runs will move you along it automatically.
+            </p>
+            <div className="inline-flex items-center gap-1.5 bg-white rounded-full px-4 py-2 mt-4">
+              <PlusIcon />
+              <span className="text-xs font-bold" style={{ color: "var(--color-accent)" }}>
+                Choose a journey
+              </span>
+            </div>
+          </Link>
+        ) : (
+          <>
+            <h1 className="text-base font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
+              Your journeys
+            </h1>
 
-        <div className="flex flex-col gap-3 mt-3">
-          {cards.map((card) => {
-            const percent = ((card.distanceCompleted / card.totalDistance) * 100).toFixed(1);
-            return (
-              <Link
-                key={card.userJourneyId}
-                href={`/journey/${card.userJourneyId}`}
-                className="block rounded-2xl p-4 border"
-                style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
-                      {card.name}
+            <div className="flex flex-col gap-3 mt-3">
+              {cards.map((card) => {
+                const percent = ((card.distanceCompleted / card.totalDistance) * 100).toFixed(1);
+                return (
+                  <Link
+                    key={card.userJourneyId}
+                    href={`/journey/${card.userJourneyId}`}
+                    className="block rounded-2xl p-4 border"
+                    style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
+                          {card.name}
+                        </div>
+                        {card.routeLabel && (
+                          <div className="text-xs font-medium mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
+                            {card.routeLabel}
+                          </div>
+                        )}
+                      </div>
+                      <span
+                        className="text-xs font-bold px-2 py-1 rounded-full shrink-0 ml-2"
+                        style={{ color: "var(--color-progress)", background: "var(--color-progress-light)" }}
+                      >
+                        {percent}%
+                      </span>
                     </div>
-                    {card.routeLabel && (
-                      <div className="text-xs font-medium mt-0.5" style={{ color: "var(--color-text-secondary)" }}>
-                        {card.routeLabel}
+                    <div className="h-2 rounded mt-3" style={{ background: "var(--color-progress-light)" }}>
+                      <div
+                        className="h-2 rounded"
+                        style={{ width: `${Math.max(Number(percent), 1)}%`, background: "var(--color-progress)" }}
+                      />
+                    </div>
+                    <div className="text-xs font-semibold mt-2" style={{ color: "var(--color-text-secondary)" }}>
+                      {formatDistance(card.distanceCompleted, unit)} / {formatDistance(card.totalDistance, unit)}
+                    </div>
+
+                    {card.nextCheckpoint && (
+                      <div className="flex items-center gap-1.5 mt-2.5 rounded-lg px-2.5 py-2" style={{ background: "#FFFFFF" }}>
+                        <PinIcon />
+                        <span className="text-[11px] font-semibold" style={{ color: "var(--color-text-primary)" }}>
+                          Next: {card.nextCheckpoint.name} &mdash;{" "}
+                          {formatDistance(card.nextCheckpoint.distance_from_start - card.distanceCompleted, unit)} away
+                        </span>
                       </div>
                     )}
-                  </div>
-                  <span
-                    className="text-xs font-bold px-2 py-1 rounded-full shrink-0 ml-2"
-                    style={{ color: "var(--color-progress)", background: "var(--color-progress-light)" }}
-                  >
-                    {percent}%
-                  </span>
-                </div>
-                <div className="h-2 rounded mt-3" style={{ background: "var(--color-progress-light)" }}>
-                  <div
-                    className="h-2 rounded"
-                    style={{ width: `${Math.max(Number(percent), 1)}%`, background: "var(--color-progress)" }}
-                  />
-                </div>
-                <div className="text-xs font-semibold mt-2" style={{ color: "var(--color-text-secondary)" }}>
-                  {formatDistance(card.distanceCompleted, unit)} / {formatDistance(card.totalDistance, unit)}
-                </div>
+                  </Link>
+                );
+              })}
+            </div>
 
-                {card.nextCheckpoint && (
-                  <div className="flex items-center gap-1.5 mt-2.5 rounded-lg px-2.5 py-2" style={{ background: "#FFFFFF" }}>
-                    <PinIcon />
-                    <span className="text-[11px] font-semibold" style={{ color: "var(--color-text-primary)" }}>
-                      Next: {card.nextCheckpoint.name} &mdash;{" "}
-                      {formatDistance(card.nextCheckpoint.distance_from_start - card.distanceCompleted, unit)} away
-                    </span>
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </div>
-
-        <Link
-          href="/journey/new"
-          className="flex items-center justify-center gap-2 rounded-2xl border border-dashed mt-3 p-3.5"
-          style={{ borderColor: "#D6D3EF", color: "var(--color-accent)" }}
-        >
-          <PlusIcon />
-          <span className="text-sm font-semibold">Start a new journey</span>
-        </Link>
+            <Link
+              href="/journey/new"
+              className="flex items-center justify-center gap-2 rounded-2xl border border-dashed mt-3 p-3.5"
+              style={{ borderColor: "#D6D3EF", color: "var(--color-accent)" }}
+            >
+              <PlusIcon />
+              <span className="text-sm font-semibold">Start a new journey</span>
+            </Link>
+          </>
+        )}
 
         <Link
           href="/journey/archive"
