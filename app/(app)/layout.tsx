@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="h-screen flex flex-col max-w-md mx-auto" style={{ background: "var(--color-bg)" }}>
+    <div className="h-dvh flex flex-col max-w-md mx-auto" style={{ background: "var(--color-bg)" }}>
       {stravaConnected && <AutoSync unit={unit} />}
       <div className="flex-1 overflow-y-auto min-h-0">{children}</div>
       <BottomNav />

@@ -47,7 +47,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6" style={{ background: "var(--color-bg)" }}>
+    <div className="min-h-dvh flex items-center justify-center px-6" style={{ background: "var(--color-bg)" }}>
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-4">
           <LogoMark size={56} />
