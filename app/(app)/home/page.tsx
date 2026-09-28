@@ -71,7 +71,7 @@ export default async function HomePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("unit_preference")
+    .select("unit_preference, display_name")
     .eq("id", user.id)
     .maybeSingle();
   const unit: UnitPreference = profile?.unit_preference ?? "km";
@@ -149,74 +149,81 @@ export default async function HomePage() {
     .limit(1)
     .maybeSingle();
 
-  const greeting = getGreeting(now);
+  const greeting = getGreeting(now, profile?.display_name ?? null);
   const dateLabel = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
 
   return (
     <div>
-      {/* Hero */}
-      <div
-        className="rounded-b-3xl px-6 pt-6 pb-7"
-        style={{
-          background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)",
-          boxShadow: "0 14px 28px -10px rgba(74, 58, 180, 0.55)",
-        }}
-      >
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.65)" }}>
-            {dateLabel}
-          </p>
-          <div className="text-2xl font-bold text-white mt-0.5" style={{ fontFamily: "var(--font-heading)" }}>
-            {greeting}
-          </div>
-          <p className="text-sm font-medium mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
-            You&rsquo;ve run {formatDistance(totalDistanceAllJourneys, unit)} across {cards.length} journey
-            {cards.length === 1 ? "" : "s"}
-          </p>
+      {/* Header */}
+      <div className="px-6 pt-10 pb-7 text-center">
+        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
+          {dateLabel}
+        </p>
+        <div className="text-[26px] font-bold mt-1.5" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
+          {greeting}
         </div>
+        <p className="text-sm font-medium mt-1.5" style={{ color: "var(--color-text-secondary)" }}>
+          You&rsquo;ve run {formatDistance(totalDistanceAllJourneys, unit)} across {cards.length} journey
+          {cards.length === 1 ? "" : "s"}
+        </p>
+      </div>
 
-        <div className="flex items-stretch gap-2.5 mt-4">
-          <div
-            className="w-1/2 rounded-2xl px-3.5 py-3 flex items-center justify-between"
-            style={{ background: "rgba(255,255,255,0.14)" }}
-          >
-            <div>
-              <div className="text-2xl font-bold text-white leading-none" style={{ fontFamily: "var(--font-heading)" }}>
+      {/* Weekly stats card */}
+      <div className="px-6">
+        <div
+          className="rounded-2xl px-4 py-4"
+          style={{
+            background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)",
+            boxShadow: "0 14px 28px -10px rgba(74, 58, 180, 0.45)",
+          }}
+        >
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="rounded-2xl px-3 py-3" style={{ background: "#FFFFFF" }}>
+              <div className="text-2xl font-bold leading-none" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
                 {formatDistance(distanceThisWeek, unit)}
               </div>
-              <div className="text-[11px] font-medium mt-1" style={{ color: "rgba(255,255,255,0.85)" }}>
+              <div className="text-[11px] font-medium mt-1" style={{ color: "var(--color-text-secondary)" }}>
                 This week
               </div>
             </div>
-            <span className="text-5xl leading-none" role="img" aria-label={getWeeklyEffortLabel(distanceThisWeek)}>
-              {getWeeklyEffortEmoji(distanceThisWeek)}
-            </span>
-          </div>
-          <div className="flex-1 grid grid-cols-2 gap-2.5 items-center">
-            <HeroStat value={cards.length} label="Active journeys" />
-            <HeroStat value={totalStampsCollected} label="Stamps collected" />
-          </div>
-        </div>
-
-        {/* Last 7 days */}
-        <div className="flex items-center justify-between mt-4 rounded-2xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
-          {last7Days.map((day, i) => (
-            <div key={i} className="flex flex-col items-center gap-1.5">
-              <div
-                className="w-2.5 h-2.5 rounded-full"
-                style={{
-                  background: day.active ? "#FFFFFF" : "rgba(255,255,255,0.25)",
-                  boxShadow: day.isToday ? "0 0 0 2px rgba(255,255,255,0.5)" : "none",
-                }}
-              />
-              <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
-                {day.label}
-              </span>
+            <div className="rounded-2xl px-3 py-3" style={{ background: "rgba(255,255,255,0.14)" }}>
+              <div className="text-2xl font-bold text-white leading-none" style={{ fontFamily: "var(--font-heading)" }}>
+                {cards.length}
+              </div>
+              <div className="text-[11px] font-medium mt-1" style={{ color: "rgba(255,255,255,0.85)" }}>
+                Active journeys
+              </div>
             </div>
-          ))}
+            <div className="rounded-2xl px-3 py-3" style={{ background: "rgba(255,255,255,0.14)" }}>
+              <div className="text-2xl font-bold text-white leading-none" style={{ fontFamily: "var(--font-heading)" }}>
+                {totalStampsCollected}
+              </div>
+              <div className="text-[11px] font-medium mt-1" style={{ color: "rgba(255,255,255,0.85)" }}>
+                Stamps collected
+              </div>
+            </div>
+          </div>
+
+          {/* Last 7 days */}
+          <div className="flex items-center justify-between mt-2.5 rounded-2xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
+            {last7Days.map((day, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5">
+                <div
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{
+                    background: day.active ? "#FFFFFF" : "rgba(255,255,255,0.25)",
+                    boxShadow: day.isToday ? "0 0 0 2px rgba(255,255,255,0.5)" : "none",
+                  }}
+                />
+                <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  {day.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <p className="text-[11px] font-medium mt-3 text-center" style={{ color: "rgba(255,255,255,0.65)" }}>
+        <p className="text-[11px] font-medium mt-3 text-center" style={{ color: "var(--color-text-secondary)" }}>
           {lastActivity
             ? `Last synced ${formatDistanceToNowStrict(new Date(lastActivity.activity_date), { addSuffix: true })}${lastActivity.source === "manual" ? " (manual)" : ""}`
             : "No activity synced yet"}
@@ -224,7 +231,7 @@ export default async function HomePage() {
       </div>
 
       {/* Journeys */}
-      <div className="px-6 pt-4 pb-6">
+      <div className="px-6 pt-6 pb-6">
         <h1 className="text-base font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
           Your journeys
         </h1>
@@ -302,39 +309,11 @@ export default async function HomePage() {
   );
 }
 
-function getWeeklyEffortEmoji(distanceThisWeekKm: number): string {
-  if (distanceThisWeekKm >= 25) return "🚀";
-  if (distanceThisWeekKm >= 10) return "💪";
-  if (distanceThisWeekKm > 0) return "🏃";
-  return "😴";
-}
-
-function getWeeklyEffortLabel(distanceThisWeekKm: number): string {
-  if (distanceThisWeekKm >= 25) return "Crushing it this week";
-  if (distanceThisWeekKm >= 10) return "Strong week so far";
-  if (distanceThisWeekKm > 0) return "Off the mark this week";
-  return "No runs logged this week yet";
-}
-
-function getGreeting(now: Date): string {
+function getGreeting(now: Date, name: string | null): string {
   const hour = now.getHours();
-  if (hour < 5) return "Still going?";
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
-
-function HeroStat({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div>
-      <div className="text-base font-bold text-white leading-none" style={{ fontFamily: "var(--font-heading)" }}>
-        {value}
-      </div>
-      <div className="text-[10px] font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>
-        {label}
-      </div>
-    </div>
-  );
+  if (hour < 5) return name ? `Still going, ${name}?` : "Still going?";
+  const timeOfDay = hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
+  return name ? `${timeOfDay}, ${name}` : timeOfDay;
 }
 
 function PinIcon() {

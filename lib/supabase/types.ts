@@ -24,6 +24,7 @@ export interface Database {
         Row: {
           id: string;
           unit_preference: "km" | "mi";
+          display_name: string | null;
           created_at: string;
         };
         Insert: Partial<Database["public"]["Tables"]["profiles"]["Row"]> & {

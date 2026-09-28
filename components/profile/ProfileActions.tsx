@@ -51,6 +51,68 @@ export function SyncNowInline() {
   );
 }
 
+export function NameEditor({ name }: { name: string | null }) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(name ?? "");
+  const [busy, setBusy] = useState(false);
+
+  async function handleSave() {
+    setBusy(true);
+    const trimmed = value.trim();
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ display_name: trimmed || null })
+        .eq("id", user.id);
+    }
+    router.refresh();
+    setBusy(false);
+    setEditing(false);
+  }
+
+  if (!editing) {
+    return (
+      <button
+        onClick={() => {
+          setValue(name ?? "");
+          setEditing(true);
+        }}
+        className="w-full text-sm font-semibold text-center"
+        style={{ color: name ? "var(--color-text-primary)" : "var(--color-accent)" }}
+      >
+        {name ? `Name · ${name}` : "Add your name"}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="e.g. Ash"
+        maxLength={40}
+        className="flex-1 rounded-lg border px-3 py-2 text-sm"
+        style={{ borderColor: "var(--color-border)" }}
+      />
+      <button
+        onClick={handleSave}
+        disabled={busy}
+        className="text-sm font-bold disabled:opacity-60"
+        style={{ color: "var(--color-accent)" }}
+      >
+        {busy ? "…" : "Save"}
+      </button>
+    </div>
+  );
+}
+
 export function UnitToggle({ unit }: { unit: UnitPreference }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { LinkWithStravaCta } from "@/components/strava/LinkWithStravaCta";
-import { DisconnectStravaButton, SyncNowInline, UnitToggle, DeleteAccountButton } from "@/components/profile/ProfileActions";
+import { DisconnectStravaButton, SyncNowInline, NameEditor, UnitToggle, DeleteAccountButton } from "@/components/profile/ProfileActions";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -17,7 +17,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("unit_preference")
+    .select("unit_preference, display_name")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -60,6 +60,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="mt-6 flex flex-col gap-5">
+        <NameEditor name={profile?.display_name ?? null} />
         <UnitToggle unit={profile?.unit_preference ?? "km"} />
         <DeleteAccountButton />
       </div>
