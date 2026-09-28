@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { LogoMark } from "@/components/Logo";
 
 export default function LoginPage() {
   return (
@@ -48,10 +49,13 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6" style={{ background: "var(--color-bg)" }}>
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-1" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
+        <div className="flex justify-center mb-4">
+          <LogoMark size={56} />
+        </div>
+        <h1 className="text-2xl font-bold mb-1 text-center" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
           Run the World
         </h1>
-        <p className="text-sm mb-6" style={{ color: "var(--color-text-secondary)" }}>
+        <p className="text-sm mb-6 text-center" style={{ color: "var(--color-text-secondary)" }}>
           Turn your real runs into journeys across the globe.
         </p>
 
