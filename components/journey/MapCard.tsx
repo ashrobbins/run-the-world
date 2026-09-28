@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { encodePolyline } from "@/lib/polyline";
-import { interpolatePosition, nearestCheckpointKm, type CheckpointLike } from "@/lib/journeys/map-position";
+import { nearestCheckpointKm, splitLineAtFraction, type CheckpointLike } from "@/lib/journeys/map-position";
 
 interface Checkpoint extends CheckpointLike {
   name: string;
@@ -22,7 +22,6 @@ export function MapCard({
   routeGeometry?: { coordinates: [number, number][] } | null;
 }) {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-  const position = interpolatePosition(checkpoints, distanceCompleted);
   const isNearCity = nearestCheckpointKm(checkpoints, distanceCompleted) <= CITY_ZOOM_THRESHOLD_KM;
   const zoom = isNearCity ? 11 : 4;
 
@@ -32,6 +31,15 @@ export function MapCard({
   const pathPoints = routeGeometry?.coordinates.length
     ? routeGeometry.coordinates.map(([lng, lat]) => ({ lat, lng }))
     : [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
+
+  // The pin must sit exactly where this same path would be cut, not wherever a
+  // separate checkpoint-to-checkpoint interpolation lands — otherwise it can end up
+  // visibly off the drawn route line.
+  const totalDistance = Math.max(...checkpoints.map((c) => c.distance_from_start));
+  const fraction = totalDistance > 0 ? distanceCompleted / totalDistance : 0;
+  const { traveled } = splitLineAtFraction(pathPoints, fraction);
+  const position = traveled[traveled.length - 1] ?? pathPoints[0];
+
   const encodedPath = encodePolyline(pathPoints);
   const pathOverlay = `path-3+6C5CE7-0.6(${encodeURIComponent(encodedPath)})`;
   const pinOverlay = `pin-s+6C5CE7(${position.lng},${position.lat})`;

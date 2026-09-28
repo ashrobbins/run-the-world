@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Map as MapboxMap } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { interpolatePosition, splitLineAtFraction, type CheckpointLike } from "@/lib/journeys/map-position";
+import { splitLineAtFraction, type CheckpointLike } from "@/lib/journeys/map-position";
 
 interface Checkpoint extends CheckpointLike {
   id: string;
@@ -47,7 +47,6 @@ export function InteractiveJourneyMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapboxMap | null>(null);
 
-  const position = interpolatePosition(checkpoints, distanceCompleted);
   const sortedCheckpoints = [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
   const pathPoints = routeGeometry?.coordinates.length
     ? routeGeometry.coordinates.map(([lng, lat]) => ({ lat, lng }))
@@ -55,6 +54,10 @@ export function InteractiveJourneyMap({
 
   const fraction = totalDistance > 0 ? distanceCompleted / totalDistance : 0;
   const { traveled, remaining } = splitLineAtFraction(pathPoints, fraction);
+  // The marker must sit exactly where the traveled/remaining line is cut — computing
+  // it separately (e.g. interpolating between checkpoints) can disagree with the
+  // fraction-of-geometry-length split above and land the marker off the route line.
+  const position = traveled[traveled.length - 1] ?? pathPoints[0];
   const nextCheckpointPoint = nextCheckpoint
     ? sortedCheckpoints.find((c) => c.name === nextCheckpoint.name)
     : undefined;

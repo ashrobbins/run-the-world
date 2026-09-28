@@ -4,25 +4,6 @@ export interface CheckpointLike extends LatLng {
   distance_from_start: number;
 }
 
-/** Naive linear interpolation between checkpoints — good enough until we interpolate along real route_geometry. */
-export function interpolatePosition<T extends CheckpointLike>(checkpoints: T[], distanceCompleted: number): LatLng {
-  const sorted = [...checkpoints].sort((a, b) => a.distance_from_start - b.distance_from_start);
-  const nextIndex = sorted.findIndex((c) => c.distance_from_start > distanceCompleted);
-
-  if (nextIndex <= 0) return sorted[0];
-  if (nextIndex === -1) return sorted[sorted.length - 1];
-
-  const prev = sorted[nextIndex - 1];
-  const next = sorted[nextIndex];
-  const span = next.distance_from_start - prev.distance_from_start;
-  const t = span === 0 ? 0 : (distanceCompleted - prev.distance_from_start) / span;
-
-  return {
-    lat: prev.lat + (next.lat - prev.lat) * t,
-    lng: prev.lng + (next.lng - prev.lng) * t,
-  };
-}
-
 export function nearestCheckpointKm<T extends CheckpointLike>(checkpoints: T[], distanceCompleted: number): number {
   return Math.min(...checkpoints.map((c) => Math.abs(c.distance_from_start - distanceCompleted)));
 }
