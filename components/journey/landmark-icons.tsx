@@ -15,7 +15,8 @@ export type LandmarkIconKey =
   | "castle"
   | "statue"
   | "gate"
-  | "monument";
+  | "monument"
+  | "stadium";
 
 const ICON_PATHS: Record<LandmarkIconKey, string[]> = {
   tower: ["M12 2L6 22M12 2L18 22", "M8 14H16", "M9.5 8H14.5"],
@@ -28,6 +29,7 @@ const ICON_PATHS: Record<LandmarkIconKey, string[]> = {
   statue: ["M12 3a2 2 0 100 4 2 2 0 000-4", "M9 21V13a3 3 0 016 0v8", "M8 21H16"],
   gate: ["M3 8H21", "M3 5H21", "M6 5V21", "M18 5V21"],
   monument: ["M10 22V6L12 2L14 6V22Z"],
+  stadium: ["M2 12C2 7 6.5 3 12 3s10 4 10 9-4.5 9-10 9S2 17 2 12Z", "M7 12a5 5 0 1110 0 5 5 0 01-10 0Z", "M12 7V17"],
 };
 
 // Cycled by index, same pattern as the Journey Library route-shape tiles.
