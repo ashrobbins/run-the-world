@@ -259,15 +259,15 @@ export default async function HomePage() {
                   </div>
                   <span
                     className="text-xs font-bold px-2 py-1 rounded-full shrink-0 ml-2"
-                    style={{ color: "var(--color-accent)", background: "var(--color-accent-light)" }}
+                    style={{ color: "var(--color-progress)", background: "var(--color-progress-light)" }}
                   >
                     {percent}%
                   </span>
                 </div>
-                <div className="h-2 rounded mt-3" style={{ background: "var(--color-accent-light)" }}>
+                <div className="h-2 rounded mt-3" style={{ background: "var(--color-progress-light)" }}>
                   <div
                     className="h-2 rounded"
-                    style={{ width: `${Math.max(Number(percent), 1)}%`, background: "var(--color-accent)" }}
+                    style={{ width: `${Math.max(Number(percent), 1)}%`, background: "var(--color-progress)" }}
                   />
                 </div>
                 <div className="text-xs font-semibold mt-2" style={{ color: "var(--color-text-secondary)" }}>

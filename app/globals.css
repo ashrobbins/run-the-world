@@ -15,6 +15,8 @@
   --color-danger: #c24a16;
   --color-danger-bg: #fdece4;
   --color-strava: #fc4c02;
+  --color-progress: #e06b9c;
+  --color-progress-light: #fce7f3;
   --shadow-card: 0 1px 2px rgba(18, 32, 61, 0.04), 0 4px 12px -4px rgba(18, 32, 61, 0.10);
 }
 
@@ -33,6 +35,8 @@
   --color-danger: var(--color-danger);
   --color-danger-bg: var(--color-danger-bg);
   --color-strava: var(--color-strava);
+  --color-progress: var(--color-progress);
+  --color-progress-light: var(--color-progress-light);
   --font-heading: var(--font-space-grotesk);
   --font-body: var(--font-ibm-plex-sans);
 }

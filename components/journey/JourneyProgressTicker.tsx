@@ -94,10 +94,10 @@ export function JourneyProgressTicker({
           / {formatDistance(totalDistance, unit)} &middot; +{formatDistance(delta, unit)}
         </div>
 
-        <div className="h-2.5 rounded-full mt-4" style={{ background: "var(--color-accent-light)" }}>
+        <div className="h-2.5 rounded-full mt-4" style={{ background: "var(--color-progress-light)" }}>
           <div
             className="h-2.5 rounded-full"
-            style={{ width: `${Math.max(percent, 1)}%`, background: "var(--color-accent)" }}
+            style={{ width: `${Math.max(percent, 1)}%`, background: "var(--color-progress)" }}
           />
         </div>
 

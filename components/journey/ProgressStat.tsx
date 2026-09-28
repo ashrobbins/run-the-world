@@ -27,15 +27,15 @@ export function ProgressStat({
           / {formatDistance(totalDistance, unit)}
         </span>
       </div>
-      <div className="h-1.5 rounded mt-3" style={{ background: "var(--color-accent-light)" }}>
+      <div className="h-1.5 rounded mt-3" style={{ background: "var(--color-progress-light)" }}>
         <div
           className="h-1.5 rounded"
-          style={{ width: `${Math.max(percent, 1)}%`, background: "var(--color-accent)" }}
+          style={{ width: `${Math.max(percent, 1)}%`, background: "var(--color-progress)" }}
         />
       </div>
       <div
         className="text-xs font-semibold mt-1.5 uppercase tracking-wide"
-        style={{ color: "var(--color-accent)" }}
+        style={{ color: "var(--color-progress)" }}
       >
         {percent.toFixed(1)}% complete
       </div>
