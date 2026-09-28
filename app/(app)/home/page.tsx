@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { startOfWeek, startOfDay, subDays, formatDistanceToNowStrict } from "date-fns";
+import { startOfWeek, startOfDay, addDays, formatDistanceToNowStrict } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { LinkWithStravaCta } from "@/components/strava/LinkWithStravaCta";
 import { formatDistance, type UnitPreference } from "@/lib/units";
@@ -101,28 +101,23 @@ export default async function HomePage() {
   const totalStampsCollected = cards.reduce((sum, c) => sum + c.reachedCount, 0);
 
   const now = new Date();
-  const weekStart = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
+  const weekStartDate = startOfWeek(now, { weekStartsOn: 1 });
+  const weekStart = weekStartDate.toISOString();
   const { data: thisWeekActivities } = await supabase
     .from("activities")
-    .select("distance")
+    .select("distance, activity_date")
     .eq("user_id", user.id)
     .gte("activity_date", weekStart);
   const distanceThisWeek = (thisWeekActivities ?? []).reduce((sum, a) => sum + a.distance, 0);
 
-  const last7Start = startOfDay(subDays(now, 6)).toISOString();
-  const { data: last7Activities } = await supabase
-    .from("activities")
-    .select("activity_date")
-    .eq("user_id", user.id)
-    .gte("activity_date", last7Start);
   const activeDayKeys = new Set(
-    (last7Activities ?? []).map((a) => startOfDay(new Date(a.activity_date)).toDateString()),
+    (thisWeekActivities ?? []).map((a) => startOfDay(new Date(a.activity_date)).toDateString()),
   );
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const date = subDays(now, 6 - i);
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const date = addDays(weekStartDate, i);
     return {
       label: date.toLocaleDateString(undefined, { weekday: "short" }).charAt(0),
-      isToday: i === 6,
+      isToday: date.toDateString() === now.toDateString(),
       active: activeDayKeys.has(startOfDay(date).toDateString()),
     };
   });
@@ -191,9 +186,9 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Last 7 days */}
+          {/* This week, Monday to Sunday */}
           <div className="flex items-center justify-between mt-2.5 rounded-2xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
-            {last7Days.map((day, i) => (
+            {weekDays.map((day, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
                 <div
                   className="w-2.5 h-2.5 rounded-full"
