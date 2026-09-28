@@ -194,7 +194,7 @@ export default async function HomePage() {
                   className="w-2.5 h-2.5 rounded-full"
                   style={{
                     background: day.active ? "#FFFFFF" : "rgba(255,255,255,0.25)",
-                    boxShadow: day.isToday ? "0 0 0 2px rgba(255,255,255,0.5)" : "none",
+                    boxShadow: day.isToday ? "0 0 0 2px var(--color-progress)" : "none",
                   }}
                 />
                 <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
