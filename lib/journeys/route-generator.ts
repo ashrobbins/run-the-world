@@ -95,7 +95,10 @@ function signature(option: RouteOption): string {
 export function generateRouteOptions(start: RoutePoint, end: RoutePoint): RouteOption[] {
   const directDistanceKm = haversineDistanceKm(start, end);
   const target = targetCheckpointCount(directDistanceKm);
-  const baseCorridorKm = Math.max(80, directDistanceKm * 0.12);
+  // Corridor width scales with trip length rather than using a flat 80km floor —
+  // otherwise a short local trip (e.g. two towns 9 miles apart) can pull in a
+  // waypoint that's tens of km off the direct line, ballooning the route.
+  const baseCorridorKm = Math.max(directDistanceKm * 0.12, Math.min(80, directDistanceKm * 0.3));
 
   const narrow = candidatesInCorridor(start, end, baseCorridorKm * 0.5);
   const medium = candidatesInCorridor(start, end, baseCorridorKm);

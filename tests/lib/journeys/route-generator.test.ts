@@ -3,6 +3,11 @@ import { generateRouteOptions, targetCheckpointCount, type RoutePoint } from "@/
 
 const LONDON: RoutePoint = { name: "London", countryCode: "uk", lat: 51.5074, lng: -0.1278 };
 const PARIS: RoutePoint = { name: "Paris", countryCode: "france", lat: 48.8566, lng: 2.3522 };
+// Two real towns ~14km apart with nothing genuinely between them — regression
+// coverage for a corridor-width bug where a flat 80km floor let in waypoints
+// tens of km off the direct line and inflated short local trips.
+const WIMBORNE: RoutePoint = { name: "Wimborne, UK", countryCode: "uk", lat: 50.8001, lng: -1.9883 };
+const BLANDFORD_FORUM: RoutePoint = { name: "Blandford Forum, UK", countryCode: "uk", lat: 50.856, lng: -2.1656 };
 // Deliberately far from any waypoint coverage and from each other, to exercise the
 // no-coverage fallback (open ocean, south of the equator between continents).
 const OCEAN_A: RoutePoint = { name: "Ocean A", countryCode: "uk", lat: -40, lng: -140 };
@@ -61,5 +66,13 @@ describe("generateRouteOptions", () => {
     const options = generateRouteOptions(LONDON, PARIS);
     const badges = options.map((o) => o.badge).filter(Boolean);
     expect(new Set(badges).size).toBe(badges.length);
+  });
+
+  it("doesn't detour a short local trip through a distant waypoint", () => {
+    const directKm = 13.9;
+    const options = generateRouteOptions(WIMBORNE, BLANDFORD_FORUM);
+    for (const option of options) {
+      expect(option.totalDistanceKm).toBeLessThan(directKm * 1.5);
+    }
   });
 });
