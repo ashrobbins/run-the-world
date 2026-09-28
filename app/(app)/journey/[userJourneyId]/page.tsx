@@ -27,7 +27,7 @@ export default async function JourneyDetailPage({
 
   const { data: userJourney } = await supabase
     .from("user_journeys")
-    .select("id, distance_completed, journey_id, status, journeys(name, total_distance, start_name, destination_name, route_geometry)")
+    .select("id, distance_completed, journey_id, status, started_at, journeys(name, total_distance, start_name, destination_name, route_geometry)")
     .eq("id", userJourneyId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -56,10 +56,14 @@ export default async function JourneyDetailPage({
     .maybeSingle();
   const unit = profile?.unit_preference ?? "km";
 
+  // Every run credits all active journeys at once (see applyDistanceToActiveJourneys),
+  // so a run only counts toward this one if it happened after this journey started —
+  // otherwise "last run added" could show a run this journey never actually received.
   const { data: lastActivity } = await supabase
     .from("activities")
     .select("distance, activity_date, source")
     .eq("user_id", user.id)
+    .gte("activity_date", userJourney.started_at)
     .order("activity_date", { ascending: false })
     .limit(1)
     .maybeSingle();
