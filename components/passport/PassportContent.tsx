@@ -32,7 +32,7 @@ export function PassportContent({
         <button
           onClick={() => setOpenStamp(mostRecentStamp)}
           className="w-full flex items-center gap-3 rounded-2xl p-3.5 mb-5 border text-left"
-          style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
+          style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
         >
           <CheckpointMarker countryCode={mostRecentStamp.country_code} state="reached" size={52} />
           <div className="flex-1">

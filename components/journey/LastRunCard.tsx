@@ -21,7 +21,7 @@ export function LastRunCard({
   return (
     <div
       className="mt-3 rounded-2xl border p-3.5"
-      style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
+      style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>

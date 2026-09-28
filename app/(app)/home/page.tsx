@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { startOfWeek } from "date-fns";
+import { startOfWeek, startOfDay, subDays, formatDistanceToNowStrict } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
 import { LinkWithStravaCta } from "@/components/strava/LinkWithStravaCta";
 import { formatDistance, type UnitPreference } from "@/lib/units";
@@ -114,7 +114,8 @@ export default async function HomePage() {
   const totalDistanceAllJourneys = cards.reduce((sum, c) => sum + c.distanceCompleted, 0);
   const totalStampsCollected = cards.reduce((sum, c) => sum + c.reachedCount, 0);
 
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 }).toISOString();
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 1 }).toISOString();
   const { data: thisWeekActivities } = await supabase
     .from("activities")
     .select("distance")
@@ -122,27 +123,104 @@ export default async function HomePage() {
     .gte("activity_date", weekStart);
   const distanceThisWeek = (thisWeekActivities ?? []).reduce((sum, a) => sum + a.distance, 0);
 
+  const last7Start = startOfDay(subDays(now, 6)).toISOString();
+  const { data: last7Activities } = await supabase
+    .from("activities")
+    .select("activity_date")
+    .eq("user_id", user.id)
+    .gte("activity_date", last7Start);
+  const activeDayKeys = new Set(
+    (last7Activities ?? []).map((a) => startOfDay(new Date(a.activity_date)).toDateString()),
+  );
+  const last7Days = Array.from({ length: 7 }, (_, i) => {
+    const date = subDays(now, 6 - i);
+    return {
+      label: date.toLocaleDateString(undefined, { weekday: "short" }).charAt(0),
+      isToday: i === 6,
+      active: activeDayKeys.has(startOfDay(date).toDateString()),
+    };
+  });
+
+  const { data: lastActivity } = await supabase
+    .from("activities")
+    .select("activity_date, source")
+    .eq("user_id", user.id)
+    .order("activity_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const greeting = getGreeting(now);
+  const dateLabel = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+
   return (
     <div>
       {/* Hero */}
       <div
         className="rounded-b-3xl px-6 pt-6 pb-7"
-        style={{ background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)" }}
+        style={{
+          background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)",
+          boxShadow: "0 14px 28px -10px rgba(74, 58, 180, 0.55)",
+        }}
       >
         <div>
-          <div className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
-            Welcome back
+          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(255,255,255,0.65)" }}>
+            {dateLabel}
+          </p>
+          <div className="text-2xl font-bold text-white mt-0.5" style={{ fontFamily: "var(--font-heading)" }}>
+            {greeting}
           </div>
           <p className="text-sm font-medium mt-1" style={{ color: "rgba(255,255,255,0.8)" }}>
             You&rsquo;ve run {formatDistance(totalDistanceAllJourneys, unit)} across {cards.length} journey
             {cards.length === 1 ? "" : "s"}
           </p>
         </div>
-        <div className="flex gap-5 mt-4">
-          <HeroStat value={cards.length} label="Active journeys" />
-          <HeroStat value={totalStampsCollected} label="Stamps collected" />
-          <HeroStat value={formatDistance(distanceThisWeek, unit)} label="this week" />
+
+        <div className="flex items-stretch gap-2.5 mt-4">
+          <div
+            className="w-1/2 rounded-2xl px-3.5 py-3 flex items-center justify-between"
+            style={{ background: "rgba(255,255,255,0.14)" }}
+          >
+            <div>
+              <div className="text-2xl font-bold text-white leading-none" style={{ fontFamily: "var(--font-heading)" }}>
+                {formatDistance(distanceThisWeek, unit)}
+              </div>
+              <div className="text-[11px] font-medium mt-1" style={{ color: "rgba(255,255,255,0.85)" }}>
+                This week
+              </div>
+            </div>
+            <span className="text-5xl leading-none" role="img" aria-label={getWeeklyEffortLabel(distanceThisWeek)}>
+              {getWeeklyEffortEmoji(distanceThisWeek)}
+            </span>
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-2.5 items-center">
+            <HeroStat value={cards.length} label="Active journeys" />
+            <HeroStat value={totalStampsCollected} label="Stamps collected" />
+          </div>
         </div>
+
+        {/* Last 7 days */}
+        <div className="flex items-center justify-between mt-4 rounded-2xl px-3.5 py-3" style={{ background: "rgba(255,255,255,0.12)" }}>
+          {last7Days.map((day, i) => (
+            <div key={i} className="flex flex-col items-center gap-1.5">
+              <div
+                className="w-2.5 h-2.5 rounded-full"
+                style={{
+                  background: day.active ? "#FFFFFF" : "rgba(255,255,255,0.25)",
+                  boxShadow: day.isToday ? "0 0 0 2px rgba(255,255,255,0.5)" : "none",
+                }}
+              />
+              <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
+                {day.label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-[11px] font-medium mt-3 text-center" style={{ color: "rgba(255,255,255,0.65)" }}>
+          {lastActivity
+            ? `Last synced ${formatDistanceToNowStrict(new Date(lastActivity.activity_date), { addSuffix: true })}${lastActivity.source === "manual" ? " (manual)" : ""}`
+            : "No activity synced yet"}
+        </p>
       </div>
 
       {/* Journeys */}
@@ -159,7 +237,7 @@ export default async function HomePage() {
                 key={card.userJourneyId}
                 href={`/journey/${card.userJourneyId}`}
                 className="block rounded-2xl p-4 border"
-                style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
+                style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -211,18 +289,48 @@ export default async function HomePage() {
           <PlusIcon />
           <span className="text-sm font-semibold">Start a new journey</span>
         </Link>
+
+        <Link
+          href="/journey/archive"
+          className="block text-center text-xs font-semibold mt-4"
+          style={{ color: "var(--color-text-secondary)" }}
+        >
+          View journey archive
+        </Link>
       </div>
     </div>
   );
 }
 
+function getWeeklyEffortEmoji(distanceThisWeekKm: number): string {
+  if (distanceThisWeekKm >= 25) return "🚀";
+  if (distanceThisWeekKm >= 10) return "💪";
+  if (distanceThisWeekKm > 0) return "🏃";
+  return "😴";
+}
+
+function getWeeklyEffortLabel(distanceThisWeekKm: number): string {
+  if (distanceThisWeekKm >= 25) return "Crushing it this week";
+  if (distanceThisWeekKm >= 10) return "Strong week so far";
+  if (distanceThisWeekKm > 0) return "Off the mark this week";
+  return "No runs logged this week yet";
+}
+
+function getGreeting(now: Date): string {
+  const hour = now.getHours();
+  if (hour < 5) return "Still going?";
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 function HeroStat({ value, label }: { value: string | number; label: string }) {
   return (
     <div>
-      <div className="text-xl font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
+      <div className="text-base font-bold text-white leading-none" style={{ fontFamily: "var(--font-heading)" }}>
         {value}
       </div>
-      <div className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.75)" }}>
+      <div className="text-[10px] font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.7)" }}>
         {label}
       </div>
     </div>

@@ -32,7 +32,7 @@ export default async function ProfilePage() {
 
       <div className="mt-5">
         {connection ? (
-          <div className="rounded-2xl border p-4" style={{ background: "#FFF6F2", borderColor: "#FCE4D8" }}>
+          <div className="rounded-2xl border p-4" style={{ background: "#FFF6F2", borderColor: "#FCE4D8", boxShadow: "var(--shadow-card)" }}>
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-bold" style={{ color: "var(--color-text-primary)" }}>

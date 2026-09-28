@@ -103,7 +103,7 @@ export function DeleteAccountButton() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="text-sm font-semibold text-left"
+        className="w-full text-sm font-semibold text-center"
         style={{ color: "#C24A16" }}
       >
         Delete my account &amp; data
@@ -112,7 +112,7 @@ export function DeleteAccountButton() {
   }
 
   return (
-    <div className="rounded-2xl border p-4 mt-2" style={{ borderColor: "#FCE4D8", background: "#FFF6F2" }}>
+    <div className="rounded-2xl border p-4 mt-2" style={{ borderColor: "#FCE4D8", background: "#FFF6F2", boxShadow: "var(--shadow-card)" }}>
       <p className="text-xs" style={{ color: "var(--color-text-secondary)" }}>
         This permanently deletes your journeys, stamps, and Strava connection. Type DELETE to confirm.
       </p>

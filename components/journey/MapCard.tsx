@@ -44,7 +44,7 @@ export function MapCard({
     <Link
       href={`/journey/${userJourneyId}/map`}
       className="mt-3.5 rounded-2xl border p-3.5 pb-3 relative block"
-      style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
+      style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
     >
       {mapUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- Mapbox Static Images API, not an optimizable local asset

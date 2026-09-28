@@ -2,7 +2,7 @@ export function LinkWithStravaCta() {
   return (
     <div
       className="w-full rounded-2xl p-4 border"
-      style={{ background: "#FFF6F0", borderColor: "#FBDCC4" }}
+      style={{ background: "#FFF6F0", borderColor: "#FBDCC4", boxShadow: "var(--shadow-card)" }}
     >
       <a
         href="/strava/connect"

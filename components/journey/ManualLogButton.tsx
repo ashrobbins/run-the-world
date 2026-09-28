@@ -20,7 +20,7 @@ export function ManualLogButton({ userJourneyId, unit }: { userJourneyId: string
   }
 
   return (
-    <form action={logManualActivity} className="rounded-2xl border p-3.5 mt-3" style={{ borderColor: "var(--color-border)", background: "var(--color-card)" }}>
+    <form action={logManualActivity} className="rounded-2xl border p-3.5 mt-3" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", boxShadow: "var(--shadow-card)" }}>
       <input type="hidden" name="userJourneyId" value={userJourneyId} />
       <div className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--color-text-secondary)" }}>
         Log a run manually

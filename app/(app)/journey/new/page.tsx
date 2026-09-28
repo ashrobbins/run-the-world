@@ -53,7 +53,7 @@ export default async function JourneyLibraryPage() {
       <Link
         href="/journey/new/custom"
         className="block rounded-2xl p-4 mb-6"
-        style={{ background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)" }}
+        style={{ background: "linear-gradient(160deg, #7C6CF0 0%, #5A48D8 100%)", boxShadow: "var(--shadow-card)" }}
       >
         <div className="font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>
           Plan your own route
@@ -83,7 +83,7 @@ export default async function JourneyLibraryPage() {
             <button
               type="submit"
               className="w-full text-left flex items-center gap-3 rounded-2xl p-3 border"
-              style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}
+              style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}
             >
               <div
                 className="w-12 h-12 rounded-xl shrink-0 overflow-hidden"

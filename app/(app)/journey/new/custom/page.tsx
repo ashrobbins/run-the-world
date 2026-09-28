@@ -31,7 +31,7 @@ export default async function CustomJourneyFormPage({
       )}
 
       <form action={submitCustomJourneyForm} className="flex flex-col gap-4">
-        <div className="rounded-2xl border" style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}>
+        <div className="rounded-2xl border" style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}>
           <div className="p-3.5">
             <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
               From

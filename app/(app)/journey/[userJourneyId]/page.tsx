@@ -6,6 +6,7 @@ import { CheckpointStampsRow } from "@/components/journey/CheckpointStampsRow";
 import { MapCard } from "@/components/journey/MapCard";
 import { LastRunCard } from "@/components/journey/LastRunCard";
 import { DeleteJourneyButton } from "@/components/journey/DeleteJourneyButton";
+import { ArchiveJourneyButton } from "@/components/journey/ArchiveJourneyButton";
 import { ManualLogButton } from "@/components/journey/ManualLogButton";
 import { JourneyProgressTicker } from "@/components/journey/JourneyProgressTicker";
 import { SyncNowButton } from "@/components/strava/SyncNowButton";
@@ -26,7 +27,7 @@ export default async function JourneyDetailPage({
 
   const { data: userJourney } = await supabase
     .from("user_journeys")
-    .select("id, distance_completed, journey_id, journeys(name, total_distance, start_name, destination_name, route_geometry)")
+    .select("id, distance_completed, journey_id, status, journeys(name, total_distance, start_name, destination_name, route_geometry)")
     .eq("id", userJourneyId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -70,6 +71,9 @@ export default async function JourneyDetailPage({
     ? `Somewhere before ${nextCheckpoint.name}`
     : "Journey complete";
 
+  const isArchived = userJourney.status !== "active";
+  const isRouteComplete = userJourney.distance_completed >= journey.total_distance;
+
   return (
     <div className="flex flex-col min-h-full">
       <JourneyProgressTicker
@@ -83,8 +87,11 @@ export default async function JourneyDetailPage({
           <BackIcon />
         </Link>
         <div className="text-center">
-          <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--color-text-secondary)" }}>
-            Active journey
+          <div
+            className="text-xs font-semibold uppercase tracking-wide"
+            style={{ color: isArchived ? "var(--color-success)" : "var(--color-text-secondary)" }}
+          >
+            {isArchived ? "Archived journey" : isRouteComplete ? "Complete" : "Active journey"}
           </div>
           <div className="text-sm font-semibold" style={{ fontFamily: "var(--font-heading)", color: "var(--color-text-primary)" }}>
             {journey.name}
@@ -146,9 +153,24 @@ export default async function JourneyDetailPage({
           </div>
         )}
 
-        <SyncNowButton userJourneyId={userJourney.id} unit={unit} />
+        {!isArchived && !isRouteComplete && (
+          <>
+            <SyncNowButton userJourneyId={userJourney.id} unit={unit} />
+            <ManualLogButton userJourneyId={userJourney.id} unit={unit} />
+          </>
+        )}
 
-        <ManualLogButton userJourneyId={userJourney.id} unit={unit} />
+        {!isArchived && isRouteComplete && (
+          <div className="mt-3">
+            <ArchiveJourneyButton userJourneyId={userJourney.id} journeyName={journey.name} />
+          </div>
+        )}
+
+        {!isArchived && !isRouteComplete && (
+          <p className="text-center text-[11px] font-medium mt-2" style={{ color: "var(--color-text-faint)" }}>
+            Finish the route to unlock archiving
+          </p>
+        )}
 
         <div className="flex justify-center mt-3 pb-4">
           <DeleteJourneyButton userJourneyId={userJourney.id} journeyName={journey.name} />

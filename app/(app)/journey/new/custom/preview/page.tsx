@@ -49,7 +49,7 @@ export default async function RoutePreviewPage() {
       </div>
 
       <div className="flex flex-row gap-3 mt-4">
-        <div className="flex-1 rounded-2xl border p-3.5" style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}>
+        <div className="flex-1 rounded-2xl border p-3.5" style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}>
           <div className="text-[10px] font-semibold uppercase" style={{ color: "var(--color-text-secondary)" }}>
             Total distance
           </div>
@@ -57,7 +57,7 @@ export default async function RoutePreviewPage() {
             {Math.round(totalDistanceKm).toLocaleString()} km
           </div>
         </div>
-        <div className="flex-1 rounded-2xl border p-3.5" style={{ background: "var(--color-card)", borderColor: "var(--color-border)" }}>
+        <div className="flex-1 rounded-2xl border p-3.5" style={{ background: "var(--color-card)", borderColor: "var(--color-border)", boxShadow: "var(--shadow-card)" }}>
           <div className="text-[10px] font-semibold uppercase" style={{ color: "var(--color-text-secondary)" }}>
             Checkpoints
           </div>

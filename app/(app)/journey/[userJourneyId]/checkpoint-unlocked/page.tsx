@@ -117,7 +117,7 @@ export default async function CheckpointUnlockedPage({
         {checkpoint.unlock_content && (
           <div
             className="rounded-2xl p-3.5 border text-sm mt-3"
-            style={{ background: "var(--color-card)", borderColor: "var(--color-border)", color: "var(--color-text-primary)" }}
+            style={{ background: "var(--color-card)", borderColor: "var(--color-border)", color: "var(--color-text-primary)", boxShadow: "var(--shadow-card)" }}
           >
             <div className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--color-text-secondary)" }}>
               Did you know?
@@ -128,7 +128,7 @@ export default async function CheckpointUnlockedPage({
 
         <div className="flex flex-row gap-3 mt-3">
           {progressPercent && (
-            <div className="flex-1 rounded-2xl p-3.5" style={{ background: "var(--color-card)" }}>
+            <div className="flex-1 rounded-2xl p-3.5" style={{ background: "var(--color-card)", boxShadow: "var(--shadow-card)" }}>
               <div className="text-[10px] font-semibold uppercase" style={{ color: "var(--color-text-secondary)" }}>
                 Journey progress
               </div>
@@ -138,7 +138,7 @@ export default async function CheckpointUnlockedPage({
             </div>
           )}
           {nextCheckpoint && (
-            <div className="flex-1 rounded-2xl p-3.5" style={{ background: "var(--color-card)" }}>
+            <div className="flex-1 rounded-2xl p-3.5" style={{ background: "var(--color-card)", boxShadow: "var(--shadow-card)" }}>
               <div className="text-[10px] font-semibold uppercase" style={{ color: "var(--color-text-secondary)" }}>
                 Next checkpoint
               </div>
