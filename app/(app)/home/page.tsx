@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { startOfWeek, startOfDay, addDays, formatDistanceToNowStrict } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile, getStravaConnection } from "@/lib/supabase/session";
 import { LinkWithStravaCta } from "@/components/strava/LinkWithStravaCta";
 import { formatDistance, type UnitPreference } from "@/lib/units";
 import { classifyCheckpoints, type CheckpointState } from "@/lib/journeys/progress";
@@ -17,16 +18,10 @@ interface JourneyCardData {
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null; // middleware already redirects; this satisfies TS
 
-  const { data: connection } = await supabase
-    .from("strava_connections")
-    .select("id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const connection = await getStravaConnection(user.id);
 
   if (!connection) {
     return (
@@ -51,7 +46,7 @@ export default async function HomePage() {
   const weekStartDate = startOfWeek(now, { weekStartsOn: 1 });
   const weekStart = weekStartDate.toISOString();
 
-  const [{ data: userJourneysRaw }, { data: profile }, { data: thisWeekActivities }, { data: lastActivity }] =
+  const [{ data: userJourneysRaw }, profile, { data: thisWeekActivities }, { data: lastActivity }] =
     await Promise.all([
       supabase
         .from("user_journeys")
@@ -59,7 +54,7 @@ export default async function HomePage() {
         .eq("user_id", user.id)
         .eq("status", "active")
         .order("started_at", { ascending: true }),
-      supabase.from("profiles").select("unit_preference, display_name").eq("id", user.id).maybeSingle(),
+      getProfile(user.id),
       supabase.from("activities").select("distance, activity_date").eq("user_id", user.id).gte("activity_date", weekStart),
       supabase
         .from("activities")

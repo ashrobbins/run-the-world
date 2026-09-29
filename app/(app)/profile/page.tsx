@@ -1,18 +1,12 @@
-import { createClient } from "@/lib/supabase/server";
 import { LinkWithStravaCta } from "@/components/strava/LinkWithStravaCta";
+import { getCurrentUser, getProfile, getStravaConnection } from "@/lib/supabase/session";
 import { DisconnectStravaButton, SyncNowInline, NameEditor, UnitToggle, DeleteAccountButton } from "@/components/profile/ProfileActions";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
-  const [{ data: connection }, { data: profile }] = await Promise.all([
-    supabase.from("strava_connections").select("strava_athlete_id, updated_at").eq("user_id", user.id).maybeSingle(),
-    supabase.from("profiles").select("unit_preference, display_name").eq("id", user.id).maybeSingle(),
-  ]);
+  const [connection, profile] = await Promise.all([getStravaConnection(user.id), getProfile(user.id)]);
 
   return (
     <div className="px-6 pt-6 pb-6">

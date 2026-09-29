@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile } from "@/lib/supabase/session";
 import { CheckpointMarker } from "@/components/checkpoint-marker/CheckpointMarker";
 import { LandmarkIcon } from "@/components/journey/landmark-icons";
 import { ShareCheckpointButton } from "@/components/journey/ShareCheckpointButton";
@@ -30,19 +31,13 @@ export default async function CheckpointUnlockedPage({
 
   const supabase = await createClient();
 
-  const [
-    { data: checkpoint },
-    {
-      data: { user },
-    },
-    { data: userJourney },
-  ] = await Promise.all([
+  const [{ data: checkpoint }, user, { data: userJourney }] = await Promise.all([
     supabase
       .from("checkpoints")
       .select("name, country_code, distance_from_start, unlock_content, journey_id, checkpoint_landmarks(name, icon_key, sequence_number)")
       .eq("id", checkpointId)
       .maybeSingle(),
-    supabase.auth.getUser(),
+    getCurrentUser(),
     supabase
       .from("user_journeys")
       .select("distance_completed, journeys(total_distance)")
@@ -54,10 +49,8 @@ export default async function CheckpointUnlockedPage({
 
   const journey = userJourney ? (Array.isArray(userJourney.journeys) ? userJourney.journeys[0] : userJourney.journeys) : null;
 
-  const [{ data: profile }, { data: allCheckpoints }] = await Promise.all([
-    user
-      ? supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle()
-      : Promise.resolve({ data: null }),
+  const [profile, { data: allCheckpoints }] = await Promise.all([
+    user ? getProfile(user.id) : Promise.resolve(null),
     supabase
       .from("checkpoints")
       .select("id, name, distance_from_start")

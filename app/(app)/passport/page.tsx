@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile } from "@/lib/supabase/session";
 import { classifyCheckpoints } from "@/lib/journeys/progress";
 import { PassportContent, type PassportStamp } from "@/components/passport/PassportContent";
 
@@ -13,17 +14,15 @@ interface CheckpointRow {
 
 export default async function PassportPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
-  const [{ data: userJourneys }, { data: profile }, { data: lastActivity }] = await Promise.all([
+  const [{ data: userJourneys }, profile, { data: lastActivity }] = await Promise.all([
     supabase
       .from("user_journeys")
       .select("id, distance_completed, journeys(id, name, start_name, destination_name)")
       .eq("user_id", user.id),
-    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+    getProfile(user.id),
     supabase
       .from("activities")
       .select("activity_date")

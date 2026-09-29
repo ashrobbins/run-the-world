@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile } from "@/lib/supabase/session";
 import { classifyCheckpoints } from "@/lib/journeys/progress";
 import { formatDistance } from "@/lib/units";
 import { InteractiveJourneyMap } from "@/components/journey/InteractiveJourneyMap";
@@ -14,9 +15,7 @@ export default async function JourneyMapPage({
   const { userJourneyId } = await params;
   const { focus } = await searchParams;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
   const { data: userJourney } = await supabase
@@ -30,13 +29,13 @@ export default async function JourneyMapPage({
 
   const journey = Array.isArray(userJourney.journeys) ? userJourney.journeys[0] : userJourney.journeys;
 
-  const [{ data: checkpoints }, { data: profile }] = await Promise.all([
+  const [{ data: checkpoints }, profile] = await Promise.all([
     supabase
       .from("checkpoints")
       .select("id, name, distance_from_start, lat, lng")
       .eq("journey_id", userJourney.journey_id)
       .order("sequence_number", { ascending: true }),
-    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+    getProfile(user.id),
   ]);
 
   if (!checkpoints || checkpoints.length === 0) notFound();

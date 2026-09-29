@@ -1,16 +1,15 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile } from "@/lib/supabase/session";
 import { formatDistance, type UnitPreference } from "@/lib/units";
 
 export default async function JourneyArchivePage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
-  const [{ data: profile }, { data: userJourneys }] = await Promise.all([
-    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+  const [profile, { data: userJourneys }] = await Promise.all([
+    getProfile(user.id),
     supabase
       .from("user_journeys")
       .select(

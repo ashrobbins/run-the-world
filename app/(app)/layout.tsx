@@ -1,21 +1,15 @@
 import { BottomNav } from "@/components/nav/BottomNav";
 import { AutoSync } from "@/components/strava/AutoSync";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile, getStravaConnection } from "@/lib/supabase/session";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   let stravaConnected = false;
   let unit: "km" | "mi" = "km";
 
   if (user) {
-    const [{ data: connection }, { data: profile }] = await Promise.all([
-      supabase.from("strava_connections").select("id").eq("user_id", user.id).maybeSingle(),
-      supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
-    ]);
+    const [connection, profile] = await Promise.all([getStravaConnection(user.id), getProfile(user.id)]);
     stravaConnected = !!connection;
     unit = profile?.unit_preference ?? "km";
   }

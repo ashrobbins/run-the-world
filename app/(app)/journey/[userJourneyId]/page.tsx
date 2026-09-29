@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, getProfile } from "@/lib/supabase/session";
 import { ProgressStat } from "@/components/journey/ProgressStat";
 import { CheckpointStampsRow } from "@/components/journey/CheckpointStampsRow";
 import { MapCard } from "@/components/journey/MapCard";
@@ -20,9 +21,7 @@ export default async function JourneyDetailPage({
 }) {
   const { userJourneyId } = await params;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
 
   const { data: userJourney } = await supabase
@@ -41,13 +40,13 @@ export default async function JourneyDetailPage({
   // Every run credits all active journeys at once (see applyDistanceToActiveJourneys),
   // so a run only counts toward this one if it happened after this journey started —
   // otherwise "last run added" could show a run this journey never actually received.
-  const [{ data: checkpointRows }, { data: profile }, { data: lastActivity }] = await Promise.all([
+  const [{ data: checkpointRows }, profile, { data: lastActivity }] = await Promise.all([
     supabase
       .from("checkpoints")
       .select("id, name, country_code, distance_from_start, lat, lng, checkpoint_landmarks(name, icon_key, sequence_number)")
       .eq("journey_id", userJourney.journey_id)
       .order("sequence_number", { ascending: true }),
-    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+    getProfile(user.id),
     supabase
       .from("activities")
       .select("distance, activity_date, source")
