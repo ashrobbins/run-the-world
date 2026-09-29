@@ -111,15 +111,17 @@ button:disabled {
 
 /* Plays once when real page content mounts underneath the splash/loading
    overlay — the swap itself is instant (React just unmounts the fallback),
-   so this fade+rise is what makes the handoff actually feel animated. */
+   so this fade is what makes the handoff actually feel animated. Opacity
+   only, deliberately — animating `transform` here would make this element
+   a new containing block for any position:fixed descendant (like the
+   splash overlay itself, rendered inside {children} via the Suspense
+   fallback), breaking its "cover the whole viewport" behavior. */
 @keyframes content-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
