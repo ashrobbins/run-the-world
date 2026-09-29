@@ -9,21 +9,18 @@ export default async function JourneyArchivePage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("unit_preference")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: profile }, { data: userJourneys }] = await Promise.all([
+    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("user_journeys")
+      .select(
+        "id, distance_completed, completed_at, journeys(name, total_distance, start_name, destination_name)",
+      )
+      .eq("user_id", user.id)
+      .neq("status", "active")
+      .order("completed_at", { ascending: false }),
+  ]);
   const unit: UnitPreference = profile?.unit_preference ?? "km";
-
-  const { data: userJourneys } = await supabase
-    .from("user_journeys")
-    .select(
-      "id, distance_completed, completed_at, journeys(name, total_distance, start_name, destination_name)",
-    )
-    .eq("user_id", user.id)
-    .neq("status", "active")
-    .order("completed_at", { ascending: false });
 
   const cards = (userJourneys ?? []).map((uj) => {
     const journey = Array.isArray(uj.journeys) ? uj.journeys[0] : uj.journeys;

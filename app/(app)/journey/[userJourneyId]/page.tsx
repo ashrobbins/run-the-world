@@ -38,35 +38,31 @@ export default async function JourneyDetailPage({
   const routeLabel = `${journey.start_name} → ${journey.destination_name}`;
   const showRouteLabel = journey.name !== routeLabel;
 
-  const { data: checkpointRows } = await supabase
-    .from("checkpoints")
-    .select("id, name, country_code, distance_from_start, lat, lng, checkpoint_landmarks(name, icon_key, sequence_number)")
-    .eq("journey_id", userJourney.journey_id)
-    .order("sequence_number", { ascending: true });
+  // Every run credits all active journeys at once (see applyDistanceToActiveJourneys),
+  // so a run only counts toward this one if it happened after this journey started —
+  // otherwise "last run added" could show a run this journey never actually received.
+  const [{ data: checkpointRows }, { data: profile }, { data: lastActivity }] = await Promise.all([
+    supabase
+      .from("checkpoints")
+      .select("id, name, country_code, distance_from_start, lat, lng, checkpoint_landmarks(name, icon_key, sequence_number)")
+      .eq("journey_id", userJourney.journey_id)
+      .order("sequence_number", { ascending: true }),
+    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("activities")
+      .select("distance, activity_date, source")
+      .eq("user_id", user.id)
+      .gte("activity_date", userJourney.started_at)
+      .order("activity_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   const checkpoints = checkpointRows?.map((c) => ({
     ...c,
     landmarks: [...(c.checkpoint_landmarks ?? [])].sort((a, b) => a.sequence_number - b.sequence_number),
   }));
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("unit_preference")
-    .eq("id", user.id)
-    .maybeSingle();
   const unit = profile?.unit_preference ?? "km";
-
-  // Every run credits all active journeys at once (see applyDistanceToActiveJourneys),
-  // so a run only counts toward this one if it happened after this journey started —
-  // otherwise "last run added" could show a run this journey never actually received.
-  const { data: lastActivity } = await supabase
-    .from("activities")
-    .select("distance, activity_date, source")
-    .eq("user_id", user.id)
-    .gte("activity_date", userJourney.started_at)
-    .order("activity_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   const classified = checkpoints ? classifyCheckpoints(checkpoints, userJourney.distance_completed) : [];
   const nextCheckpoint = classified.find((c) => c.state === "next");

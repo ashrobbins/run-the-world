@@ -47,19 +47,29 @@ export default async function HomePage() {
     );
   }
 
-  const { data: userJourneysRaw } = await supabase
-    .from("user_journeys")
-    .select("id, distance_completed, journeys(id, name, total_distance, start_name, destination_name)")
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .order("started_at", { ascending: true });
-  const userJourneys = userJourneysRaw ?? [];
+  const now = new Date();
+  const weekStartDate = startOfWeek(now, { weekStartsOn: 1 });
+  const weekStart = weekStartDate.toISOString();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("unit_preference, display_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: userJourneysRaw }, { data: profile }, { data: thisWeekActivities }, { data: lastActivity }] =
+    await Promise.all([
+      supabase
+        .from("user_journeys")
+        .select("id, distance_completed, journeys(id, name, total_distance, start_name, destination_name)")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .order("started_at", { ascending: true }),
+      supabase.from("profiles").select("unit_preference, display_name").eq("id", user.id).maybeSingle(),
+      supabase.from("activities").select("distance, activity_date").eq("user_id", user.id).gte("activity_date", weekStart),
+      supabase
+        .from("activities")
+        .select("activity_date, source")
+        .eq("user_id", user.id)
+        .order("activity_date", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+  const userJourneys = userJourneysRaw ?? [];
   const unit: UnitPreference = profile?.unit_preference ?? "km";
 
   const journeyIds = userJourneys
@@ -100,16 +110,7 @@ export default async function HomePage() {
   const totalDistanceAllJourneys = cards.reduce((sum, c) => sum + c.distanceCompleted, 0);
   const totalStampsCollected = cards.reduce((sum, c) => sum + c.reachedCount, 0);
 
-  const now = new Date();
-  const weekStartDate = startOfWeek(now, { weekStartsOn: 1 });
-  const weekStart = weekStartDate.toISOString();
-  const { data: thisWeekActivities } = await supabase
-    .from("activities")
-    .select("distance, activity_date")
-    .eq("user_id", user.id)
-    .gte("activity_date", weekStart);
   const distanceThisWeek = (thisWeekActivities ?? []).reduce((sum, a) => sum + a.distance, 0);
-
   const activeDayKeys = new Set(
     (thisWeekActivities ?? []).map((a) => startOfDay(new Date(a.activity_date)).toDateString()),
   );
@@ -121,14 +122,6 @@ export default async function HomePage() {
       active: activeDayKeys.has(startOfDay(date).toDateString()),
     };
   });
-
-  const { data: lastActivity } = await supabase
-    .from("activities")
-    .select("activity_date, source")
-    .eq("user_id", user.id)
-    .order("activity_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
 
   const greeting = getGreeting(now, profile?.display_name ?? null);
   const dateLabel = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });

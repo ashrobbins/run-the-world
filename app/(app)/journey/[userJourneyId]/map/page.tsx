@@ -30,19 +30,17 @@ export default async function JourneyMapPage({
 
   const journey = Array.isArray(userJourney.journeys) ? userJourney.journeys[0] : userJourney.journeys;
 
-  const { data: checkpoints } = await supabase
-    .from("checkpoints")
-    .select("id, name, distance_from_start, lat, lng")
-    .eq("journey_id", userJourney.journey_id)
-    .order("sequence_number", { ascending: true });
+  const [{ data: checkpoints }, { data: profile }] = await Promise.all([
+    supabase
+      .from("checkpoints")
+      .select("id, name, distance_from_start, lat, lng")
+      .eq("journey_id", userJourney.journey_id)
+      .order("sequence_number", { ascending: true }),
+    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+  ]);
 
   if (!checkpoints || checkpoints.length === 0) notFound();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("unit_preference")
-    .eq("id", user.id)
-    .maybeSingle();
   const unit = profile?.unit_preference ?? "km";
 
   const classified = classifyCheckpoints(checkpoints, userJourney.distance_completed);

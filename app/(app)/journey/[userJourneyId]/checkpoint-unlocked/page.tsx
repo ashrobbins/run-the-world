@@ -29,34 +29,42 @@ export default async function CheckpointUnlockedPage({
   if (!checkpointId) notFound();
 
   const supabase = await createClient();
-  const { data: checkpoint } = await supabase
-    .from("checkpoints")
-    .select("name, country_code, distance_from_start, unlock_content, journey_id, checkpoint_landmarks(name, icon_key, sequence_number)")
-    .eq("id", checkpointId)
-    .maybeSingle();
+
+  const [
+    { data: checkpoint },
+    {
+      data: { user },
+    },
+    { data: userJourney },
+  ] = await Promise.all([
+    supabase
+      .from("checkpoints")
+      .select("name, country_code, distance_from_start, unlock_content, journey_id, checkpoint_landmarks(name, icon_key, sequence_number)")
+      .eq("id", checkpointId)
+      .maybeSingle(),
+    supabase.auth.getUser(),
+    supabase
+      .from("user_journeys")
+      .select("distance_completed, journeys(total_distance)")
+      .eq("id", userJourneyId)
+      .maybeSingle(),
+  ]);
 
   if (!checkpoint) notFound();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle()
-    : { data: null };
-  const unit = profile?.unit_preference ?? "km";
-
-  const { data: userJourney } = await supabase
-    .from("user_journeys")
-    .select("distance_completed, journeys(total_distance)")
-    .eq("id", userJourneyId)
-    .maybeSingle();
   const journey = userJourney ? (Array.isArray(userJourney.journeys) ? userJourney.journeys[0] : userJourney.journeys) : null;
 
-  const { data: allCheckpoints } = await supabase
-    .from("checkpoints")
-    .select("id, name, distance_from_start")
-    .eq("journey_id", checkpoint.journey_id)
-    .order("sequence_number", { ascending: true });
+  const [{ data: profile }, { data: allCheckpoints }] = await Promise.all([
+    user
+      ? supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("checkpoints")
+      .select("id, name, distance_from_start")
+      .eq("journey_id", checkpoint.journey_id)
+      .order("sequence_number", { ascending: true }),
+  ]);
+  const unit = profile?.unit_preference ?? "km";
 
   const progressPercent =
     userJourney && journey ? ((userJourney.distance_completed / journey.total_distance) * 100).toFixed(1) : null;

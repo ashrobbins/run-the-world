@@ -2,6 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { classifyCheckpoints } from "@/lib/journeys/progress";
 import { PassportContent, type PassportStamp } from "@/components/passport/PassportContent";
 
+interface CheckpointRow {
+  id: string;
+  journey_id: string;
+  name: string;
+  country_code: string;
+  distance_from_start: number;
+  checkpoint_landmarks: { name: string; icon_key: string; sequence_number: number }[];
+}
+
 export default async function PassportPage() {
   const supabase = await createClient();
   const {
@@ -9,25 +18,39 @@ export default async function PassportPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: userJourneys } = await supabase
-    .from("user_journeys")
-    .select("id, distance_completed, journeys(id, name, start_name, destination_name)")
-    .eq("user_id", user.id);
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("unit_preference")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: userJourneys }, { data: profile }, { data: lastActivity }] = await Promise.all([
+    supabase
+      .from("user_journeys")
+      .select("id, distance_completed, journeys(id, name, start_name, destination_name)")
+      .eq("user_id", user.id),
+    supabase.from("profiles").select("unit_preference").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("activities")
+      .select("activity_date")
+      .eq("user_id", user.id)
+      .order("activity_date", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
   const unit = profile?.unit_preference ?? "km";
 
-  const { data: lastActivity } = await supabase
-    .from("activities")
-    .select("activity_date")
-    .eq("user_id", user.id)
-    .order("activity_date", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const journeyIds = (userJourneys ?? [])
+    .map((uj) => (Array.isArray(uj.journeys) ? uj.journeys[0]?.id : uj.journeys?.id))
+    .filter((id): id is string => Boolean(id));
+
+  const { data: allCheckpoints } = journeyIds.length
+    ? await supabase
+        .from("checkpoints")
+        .select("id, journey_id, name, country_code, distance_from_start, checkpoint_landmarks(name, icon_key, sequence_number)")
+        .in("journey_id", journeyIds)
+    : { data: [] as CheckpointRow[] };
+
+  const checkpointsByJourney = new Map<string, CheckpointRow[]>();
+  for (const cp of allCheckpoints ?? []) {
+    const list = checkpointsByJourney.get(cp.journey_id) ?? [];
+    list.push(cp);
+    checkpointsByJourney.set(cp.journey_id, list);
+  }
 
   const stamps: PassportStamp[] = [];
   let journeyCount = 0;
@@ -38,12 +61,7 @@ export default async function PassportPage() {
     journeyCount++;
     const routeLabel = `${journey.start_name} → ${journey.destination_name}`;
 
-    const { data: checkpoints } = await supabase
-      .from("checkpoints")
-      .select("id, name, country_code, distance_from_start, checkpoint_landmarks(name, icon_key, sequence_number)")
-      .eq("journey_id", journey.id);
-    if (!checkpoints) continue;
-
+    const checkpoints = checkpointsByJourney.get(journey.id) ?? [];
     const withLandmarks = checkpoints.map((c) => ({
       ...c,
       landmarks: [...(c.checkpoint_landmarks ?? [])].sort((a, b) => a.sequence_number - b.sequence_number),

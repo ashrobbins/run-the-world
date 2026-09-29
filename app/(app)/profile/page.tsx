@@ -9,17 +9,10 @@ export default async function ProfilePage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: connection } = await supabase
-    .from("strava_connections")
-    .select("strava_athlete_id, updated_at")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("unit_preference, display_name")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: connection }, { data: profile }] = await Promise.all([
+    supabase.from("strava_connections").select("strava_athlete_id, updated_at").eq("user_id", user.id).maybeSingle(),
+    supabase.from("profiles").select("unit_preference, display_name").eq("id", user.id).maybeSingle(),
+  ]);
 
   return (
     <div className="px-6 pt-6 pb-6">
