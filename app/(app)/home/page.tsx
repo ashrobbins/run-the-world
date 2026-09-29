@@ -191,10 +191,9 @@ export default async function HomePage() {
             {weekDays.map((day, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5">
                 <div
-                  className="w-2.5 h-2.5 rounded-full"
+                  className={`w-2.5 h-2.5 rounded-full ${day.isToday ? "today-dot-ring" : ""}`}
                   style={{
                     background: day.active ? "#FFFFFF" : "rgba(255,255,255,0.25)",
-                    boxShadow: day.isToday ? "0 0 0 2px var(--color-progress)" : "none",
                   }}
                 />
                 <span className="text-[10px] font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>

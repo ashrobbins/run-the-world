@@ -56,3 +56,16 @@ a {
 button:disabled {
   cursor: not-allowed;
 }
+
+@keyframes today-dot-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--color-progress);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-progress) 45%, transparent);
+  }
+}
+
+.today-dot-ring {
+  animation: today-dot-pulse 2.2s ease-in-out infinite;
+}
