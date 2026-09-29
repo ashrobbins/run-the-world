@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Turn your real runs into journeys across the globe.",
     start_url: "/home",
     display: "standalone",
-    background_color: "#ffffff",
+    background_color: "#5A48D8",
     theme_color: "#6C5CE7",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
